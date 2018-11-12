@@ -257,6 +257,104 @@ body {
   background-color: yellow !important;
 }
 
+/* Readium CSS
+ Ivory mode
+ 
+ A preset theme for sepia mode
+ 
+ Repo: https://github.com/readium/readium-css */
+
+/* CONFIG */
+
+:root[style*="readium-ivory-on"] {
+    --RS__backgroundColor: #f2e9cd;
+    --RS__textColor: #55503f;
+    
+    --RS__linkColor: #0000EE;
+    --RS__visitedColor: #551A8B;
+    
+    /* This can be customized but initial will re-use default value of the browser */
+    --RS__selectionBackgroundColor: #b4d8fe;
+    --RS__selectionTextColor: inherit;
+    
+    --RS__maxLineLength: 40.01rem; /* Forcing a reflow in Blink/Webkit so that blend mode can work */
+}
+
+/* we don’t need to redeclare bg-color and color for :root since we will inherit and update from day/default mode */
+
+:root[style*="readium-ivory-on"] body {
+    /* Should be transparent but Chrome bug https://bugs.chromium.org/p/chromium/issues/detail?id=711955&q=mix-blend-mode&colspec=ID%20Pri%20M%20Stars%20ReleaseBlock%20Component%20Status%20Owner%20Summary%20OS%20Modified */
+    
+    color: inherit;
+    background-color: var(--RS__backgroundColor);
+}
+
+:root[style*="readium-ivory-on"] a:link,
+:root[style*="readium-ivory-on"] a:link * {
+    color: var(--RS__linkColor);
+}
+
+:root[style*="readium-ivory-on"] a:visited,
+:root[style*="readium-ivory-on"] a:visited * {
+    color: var(--RS__visitedColor);
+}
+
+:root[style*="readium-ivory-on"] svg,
+:root[style*="readium-ivory-on"] img {
+    /* Make sure the proper bg-color is used for the blend mode */
+    background-color: transparent !important;
+    mix-blend-mode: multiply;
+}
+
+/* Readium CSS
+ Green mode
+ 
+ A preset theme for sepia mode
+ 
+ Repo: https://github.com/readium/readium-css */
+
+/* CONFIG */
+
+:root[style*="readium-green-on"] {
+    --RS__backgroundColor: #259722;
+    --RS__textColor: #ffffff;
+    
+    --RS__linkColor: #0000EE;
+    --RS__visitedColor: #551A8B;
+    
+    /* This can be customized but initial will re-use default value of the browser */
+    --RS__selectionBackgroundColor: #b4d8fe;
+    --RS__selectionTextColor: inherit;
+    
+    --RS__maxLineLength: 40.01rem; /* Forcing a reflow in Blink/Webkit so that blend mode can work */
+}
+
+/* we don’t need to redeclare bg-color and color for :root since we will inherit and update from day/default mode */
+
+:root[style*="readium-green-on"] body {
+    /* Should be transparent but Chrome bug https://bugs.chromium.org/p/chromium/issues/detail?id=711955&q=mix-blend-mode&colspec=ID%20Pri%20M%20Stars%20ReleaseBlock%20Component%20Status%20Owner%20Summary%20OS%20Modified */
+    
+    color: inherit;
+    background-color: var(--RS__backgroundColor);
+}
+
+:root[style*="readium-green-on"] a:link,
+:root[style*="readium-green-on"] a:link * {
+    color: var(--RS__linkColor);
+}
+
+:root[style*="readium-green-on"] a:visited,
+:root[style*="readium-green-on"] a:visited * {
+    color: var(--RS__visitedColor);
+}
+
+:root[style*="readium-green-on"] svg,
+:root[style*="readium-green-on"] img {
+    /* Make sure the proper bg-color is used for the blend mode */
+    background-color: transparent !important;
+    mix-blend-mode: multiply;
+}
+
 /* Readium CSS 
    Night mode
 
@@ -269,9 +367,9 @@ body {
 /* [style*="--USER__appearance"] can be used to increase specificity but performance hit */
 
 :root[style*="readium-night-on"] {
-  --RS__backgroundColor: #000000;
-  --RS__textColor: #FEFEFE;
-
+  --RS__backgroundColor: #303030;
+  --RS__textColor: #55503f;
+    
   --RS__linkColor: #63caff;
   --RS__visitedColor: #0099E5;
 
