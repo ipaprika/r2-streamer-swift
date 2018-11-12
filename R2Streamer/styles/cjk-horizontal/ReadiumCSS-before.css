@@ -270,8 +270,8 @@ math {
 /* CONFIG */
 
 :root {
-  --RS__backgroundColor: #FFFFFF;
-  --RS__textColor: #121212;
+  --RS__backgroundColor: #ffffff;
+  --RS__textColor: #333333;
 
   /* This can be customized but initial will re-use default value of the browser */
   --RS__selectionBackgroundColor: #b4d8fe;

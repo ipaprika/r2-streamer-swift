@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		03D011F0208020270097A87C /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D011EF208020270097A87C /* Minizip.framework */; };
 		57BFC4A7209C8EDC0018EC21 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 57BFC4A5209C8EDC0018EC21 /* scripts */; };
 		57BFC4A8209C8EDC0018EC21 /* styles in Resources */ = {isa = PBXBuildFile; fileRef = 57BFC4A6209C8EDC0018EC21 /* styles */; };
 		59501DDE1E2FB0D700D1B4BF /* R2Streamer.h in Headers */ = {isa = PBXBuildFile; fileRef = 59501DD01E2FB0D700D1B4BF /* R2Streamer.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -22,10 +21,14 @@
 		59501E0C1E2FB16600D1B4BF /* ZipInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59501DF51E2FB16600D1B4BF /* ZipInputStream.swift */; };
 		59501E141E2FB16600D1B4BF /* Zip.h in Headers */ = {isa = PBXBuildFile; fileRef = 59501E001E2FB16600D1B4BF /* Zip.h */; };
 		59501E151E2FB16600D1B4BF /* ZipArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59501E011E2FB16600D1B4BF /* ZipArchive.swift */; };
-		59501E1B1E2FB1F500D1B4BF /* AEXML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E181E2FB1F500D1B4BF /* AEXML.framework */; };
-		59501E1C1E2FB1F500D1B4BF /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E191E2FB1F500D1B4BF /* GCDWebServers.framework */; };
-		59501E201E2FB2AD00D1B4BF /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E1F1E2FB2AD00D1B4BF /* libz.tbd */; };
 		AEBE1F3D20EF903700418960 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = AEBE1F3C20EF903700418960 /* fonts */; };
+		C33F793C2199C60A00123A74 /* R2Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C33F793B2199C60A00123A74 /* R2Shared.framework */; };
+		C3EB74E4219869BA008D0242 /* AEXML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E181E2FB1F500D1B4BF /* AEXML.framework */; };
+		C3EB74E5219869BA008D0242 /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3ED92DB1EA0C93F00E15C8F /* CryptoSwift.framework */; };
+		C3EB74E6219869BA008D0242 /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E191E2FB1F500D1B4BF /* GCDWebServers.framework */; };
+		C3EB74E7219869BA008D0242 /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D011EF208020270097A87C /* Minizip.framework */; };
+		C3EB74E8219869BA008D0242 /* ObjectMapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E1A1E2FB1F500D1B4BF /* ObjectMapper.framework */; };
+		C3EB74EB219869BA008D0242 /* Fuzi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EB74EA219869BA008D0242 /* Fuzi.framework */; };
 		F300FA371F8E1D7700442332 /* DrmDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F300FA361F8E1D7700442332 /* DrmDecoder.swift */; };
 		F302CA271F0CD32800835B22 /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F302CA261F0CD32800835B22 /* DataExtension.swift */; };
 		F3098E711E7BFF87002358A1 /* NCXParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3098E701E7BFF87002358A1 /* NCXParser.swift */; };
@@ -45,11 +48,8 @@
 		F3E0214F1E9277A80094CFF7 /* ContainerCbzDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E0214E1E9277A80094CFF7 /* ContainerCbzDirectory.swift */; };
 		F3E6A2D61E70111500BBD81C /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E6A2D51E70111500BBD81C /* Logger.swift */; };
 		F3E6A2D81E70113600BBD81C /* LoggerStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E6A2D71E70113600BBD81C /* LoggerStub.swift */; };
-		F3E7D4251F4ED05F00DF166D /* R2Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E7D4241F4ED05F00DF166D /* R2Shared.framework */; };
-		F3E7D4261F4EDD7800DF166D /* ObjectMapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E1A1E2FB1F500D1B4BF /* ObjectMapper.framework */; };
 		F3ED92D61E9F702E00E15C8F /* FontDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3ED92D51E9F702E00E15C8F /* FontDecoder.swift */; };
 		F3ED92DA1EA0AF0000E15C8F /* DataInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3ED92D91EA0AF0000E15C8F /* DataInputStream.swift */; };
-		F3ED92DC1EA0C93F00E15C8F /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3ED92DB1EA0C93F00E15C8F /* CryptoSwift.framework */; };
 		F3F41E151FA0EBDE00F97737 /* DataCompression.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3F41E141FA0EBDE00F97737 /* DataCompression.swift */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +77,10 @@
 		59501E1A1E2FB1F500D1B4BF /* ObjectMapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ObjectMapper.framework; path = Carthage/Build/iOS/ObjectMapper.framework; sourceTree = "<group>"; };
 		59501E1F1E2FB2AD00D1B4BF /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		AEBE1F3C20EF903700418960 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fonts; sourceTree = "<group>"; };
+		C33F793B2199C60A00123A74 /* R2Shared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = R2Shared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3EB74EA219869BA008D0242 /* Fuzi.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fuzi.framework; path = Carthage/Build/iOS/Fuzi.framework; sourceTree = "<group>"; };
+		C3EC68452198616C007EEEC1 /* Pods_R2TestApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_R2TestApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3EC68532198674E007EEEC1 /* Pods_R2TestApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_R2TestApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F300FA361F8E1D7700442332 /* DrmDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DrmDecoder.swift; path = Sources/fetcher/DrmDecoder.swift; sourceTree = SOURCE_ROOT; };
 		F302CA261F0CD32800835B22 /* DataExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
 		F3098E701E7BFF87002358A1 /* NCXParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NCXParser.swift; path = Sources/parser/NCXParser.swift; sourceTree = SOURCE_ROOT; };
@@ -114,13 +118,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F3E7D4261F4EDD7800DF166D /* ObjectMapper.framework in Frameworks */,
-				F3E7D4251F4ED05F00DF166D /* R2Shared.framework in Frameworks */,
-				03D011F0208020270097A87C /* Minizip.framework in Frameworks */,
-				59501E201E2FB2AD00D1B4BF /* libz.tbd in Frameworks */,
-				59501E1B1E2FB1F500D1B4BF /* AEXML.framework in Frameworks */,
-				59501E1C1E2FB1F500D1B4BF /* GCDWebServers.framework in Frameworks */,
-				F3ED92DC1EA0C93F00E15C8F /* CryptoSwift.framework in Frameworks */,
+				C33F793C2199C60A00123A74 /* R2Shared.framework in Frameworks */,
+				C3EB74EB219869BA008D0242 /* Fuzi.framework in Frameworks */,
+				C3EB74E4219869BA008D0242 /* AEXML.framework in Frameworks */,
+				C3EB74E5219869BA008D0242 /* CryptoSwift.framework in Frameworks */,
+				C3EB74E6219869BA008D0242 /* GCDWebServers.framework in Frameworks */,
+				C3EB74E7219869BA008D0242 /* Minizip.framework in Frameworks */,
+				C3EB74E8219869BA008D0242 /* ObjectMapper.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,6 +242,10 @@
 		59501E171E2FB1F500D1B4BF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C33F793B2199C60A00123A74 /* R2Shared.framework */,
+				C3EB74EA219869BA008D0242 /* Fuzi.framework */,
+				C3EC68532198674E007EEEC1 /* Pods_R2TestApp.framework */,
+				C3EC68452198616C007EEEC1 /* Pods_R2TestApp.framework */,
 				03D011EF208020270097A87C /* Minizip.framework */,
 				F3E7D4241F4ED05F00DF166D /* R2Shared.framework */,
 				F3ED92DB1EA0C93F00E15C8F /* CryptoSwift.framework */,
@@ -404,7 +412,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#/usr/local/bin/carthage copy-frameworks";
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
