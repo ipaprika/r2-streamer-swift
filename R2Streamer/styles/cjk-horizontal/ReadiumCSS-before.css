@@ -67,7 +67,7 @@
 
 :root {
   /* Default font-stacks */
-  --RS__oldStyleTf: "Iowan Old Style", "Sitka Text", Palatino, "Book Antiqua", serif;
+  --RS__oldStyleTf: "KoPub Batang Bold", "KoPub Batang Medium", "KoPub Batang Light", "KoPub Dotum Bold", "KoPub Dotum Medium", "KoPub Dotum Light", serif;
   --RS__modernTf: Athelas, Constantia, Georgia, serif;
   --RS__sansTf: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --RS__humanistTf: Seravek, Calibri, Roboto, Arial, sans-serif;
