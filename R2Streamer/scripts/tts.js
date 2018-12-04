@@ -36,6 +36,18 @@ function tts_execute(current_index) {
         
         // 완료처리
         call_to_native_tts_finished(current_index);
+        
+        if (is_tts_auto_page) {
+            var is_last_page = ADDON_IPAPRIKA.JS.move_TTS_Next_Page(); // 다음 페이지로 이동
+            
+            if (!is_last_page) {
+                setTimeout(function() {
+                           tts_reset();
+                           tts_ready(is_tts_auto_page);
+                }, 1000);
+            }
+        }
+        
         return;
     }
     
@@ -47,15 +59,30 @@ function tts_execute(current_index) {
     call_to_native_current_idx(tts_result_json[current_index].TEXT, current_index);
 }
 
+function tts_reset() {
+    is_tts_ready_ing = false;
+    is_tts_text_reading = false;
+    ADDON_IPAPRIKA.JS.remove_TTS_All_Highlight(); // 하이라이트 처리된 영역 초기화
+    tts_result_json = null;
+}
+
 // 네이티브에서 읽기 완료시 호출
 function call_from_native_current_tts_finished(index) {
     is_tts_text_reading = false;
     tts_execute(index + 1);
 }
 
+function call_from_native_next_page() {
+    ADDON_IPAPRIKA.JS.move_TTS_Next_Page(); // 다음 페이지로 이동
+}
+
+function call_from_native_reset() {
+    tts_reset();
+}
+
 function call_to_native_tts_ready() {
     try {
-        webkit.messageHandlers.ttsHandler.postMessage({event: "ready", index: 0});
+        webkit.messageHandlers.ttsHandler.postMessage({event: "ready", index: 0, auto: is_tts_auto_page});
     } catch (error) {
         alert(error);
     }
@@ -63,7 +90,7 @@ function call_to_native_tts_ready() {
 
 function call_to_native_current_idx(txt, idx) {
     try {
-        webkit.messageHandlers.ttsHandler.postMessage({event: "current", index: idx, text: txt});
+        webkit.messageHandlers.ttsHandler.postMessage({event: "current", index: idx, auto: is_tts_auto_page, text: txt});
     } catch (error) {
         alert(error);
     }
@@ -71,7 +98,7 @@ function call_to_native_current_idx(txt, idx) {
 
 function call_to_native_tts_finished(idx) {
     try {
-        webkit.messageHandlers.ttsHandler.postMessage({event: "finish", index: idx});
+        webkit.messageHandlers.ttsHandler.postMessage({event: "finish", index: idx, auto: is_tts_auto_page});
     } catch (error) {
         alert(error);
     }
