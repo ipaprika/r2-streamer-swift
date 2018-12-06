@@ -11,8 +11,6 @@ function tts_ready(is_auto_page) {
     
     if (tts_result_json == null) {
         is_tts_ready_ing = true;
-        is_tts_text_reading = false; // 특정 텍스트 TTS 읽기가 진행중인지 여부
-        
         var result_json = ADDON_IPAPRIKA.JS.get_TTS_Json_List(); // TTS 대상 Json 문자열 가져오기
         tts_result_json = JSON.parse(result_json); // Json 객체로 변환 ('get_TTS_Json_List' 함수 내부로직에서 변환해주고 싶었지만 무슨 이유에서인지 에러가 발생함.. 그냥 알아서 변환해주도록..)
     }
@@ -20,6 +18,7 @@ function tts_ready(is_auto_page) {
     // 준비 완료상태 전달
     is_tts_auto_page = is_auto_page;
     is_tts_ready_ing = false;
+    is_tts_text_reading = false;
     call_to_native_tts_ready();
 }
 
@@ -35,7 +34,7 @@ function tts_execute(current_index) {
         ADDON_IPAPRIKA.JS.remove_TTS_All_Highlight(); // 하이라이트 처리된 영역 초기화
         
         // 완료처리
-        call_to_native_tts_finished(current_index);
+        call_to_native_tts_finished();
         
         if (is_tts_auto_page) {
             var is_last_page = ADDON_IPAPRIKA.JS.move_TTS_Next_Page(); // 다음 페이지로 이동
@@ -45,6 +44,8 @@ function tts_execute(current_index) {
                            tts_reset();
                            tts_ready(is_tts_auto_page);
                 }, 1000);
+            } else {
+                call_to_native_tts_last_page();
             }
         }
         
@@ -64,6 +65,10 @@ function tts_reset() {
     is_tts_text_reading = false;
     ADDON_IPAPRIKA.JS.remove_TTS_All_Highlight(); // 하이라이트 처리된 영역 초기화
     tts_result_json = null;
+}
+
+function call_from_native_start(index) {
+    tts_execute(index);
 }
 
 // 네이티브에서 읽기 완료시 호출
@@ -96,9 +101,17 @@ function call_to_native_current_idx(txt, idx) {
     }
 }
 
-function call_to_native_tts_finished(idx) {
+function call_to_native_tts_finished() {
     try {
-        webkit.messageHandlers.ttsHandler.postMessage({event: "finish", index: idx, auto: is_tts_auto_page});
+        webkit.messageHandlers.ttsHandler.postMessage({event: "finish", auto: is_tts_auto_page});
+    } catch (error) {
+        alert(error);
+    }
+}
+
+function call_to_native_tts_last_page() {
+    try {
+        webkit.messageHandlers.ttsHandler.postMessage({event: "last", auto: is_tts_auto_page});
     } catch (error) {
         alert(error);
     }
