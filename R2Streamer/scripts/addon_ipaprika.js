@@ -1,3 +1,4 @@
+﻿
 var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
 ADDON_IPAPRIKA.JS = {
@@ -17,14 +18,8 @@ ADDON_IPAPRIKA.JS = {
         //--------------------------------------------------------------------------------
         var result_json = ""; // TTS 대상 객체 Json 문자열이 저장되는 변수
 
-        // 다른 형상은 보지못해서 모르겠지만..
-        // 샘플로 넘어온 html 에는 내용이 아래와 같은 태그 구조로 되어있었음..
-        //--------------------------------------------------------------------------------
-        //<div class="body">
-        //    <div id="chapter_32339" class="chapter">
-        //--------------------------------------------------------------------------------
         // 혹시라도 다른 html 태그 내에 내용이 존재하는 경우 다르게 지정해야함!
-        var content_root = $(".body .chapter");
+        var content_root = $("body");
         
         // TTS 커스텀 태그 영역에 설정된 인덱스 번호 속성 제거 (해당 속성이 없을 경우 TTS 대상에서 제외됨)
         content_root.find(".ipaprika_character_area").each(function () {
@@ -33,7 +28,12 @@ ADDON_IPAPRIKA.JS = {
             var new_class = $(this).attr("class").replace(/-tts-item-idx-.*?-/g, "");
             $(this).attr("class", new_class);
 
-            $(this).css("color", $(this).attr("ipaprika_def_color")); // TTS 커스텀 태그 영역 하이라이트 해제
+			// TTS 커스텀 태그 영역 하이라이트 해제
+			var matches = $(this).attr("class").match(/-tts-def-color-.*?-/g);
+			if (matches) {
+				var def_color = matches[0].replace("-tts-def-color-", "").replace("-", "");
+				$(this).css("color", def_color);
+			}
         });
 
         // TTS 커스텀 태그 영역 설정 함수
@@ -93,25 +93,13 @@ ADDON_IPAPRIKA.JS = {
         // TTS 커스텀 태그 영역 설정
         content_root.children().each(function () {
 
-            var obj = $(this);
-                
-            if (obj.children().length > 0) {
-                // 하위에 태그가 존재할 경우
-
-                obj.children().each(function () {
-
-                    set_TTS_Tag_Area($(this)); // TTS 커스텀 태그 영역 설정
-                });
-            }
-            else {
-                // 하위에 태그가 존재하지 않은 경우
-
-                set_TTS_Tag_Area(obj); // TTS 커스텀 태그 영역 설정
-            }
+			set_TTS_Tag_Area($(this)); // TTS 커스텀 태그 영역 설정
         });
+		
+		var obj = $(window);
 
-        var scroll_left = $("body").scrollLeft(); // 현재 스크롤 영역의 left 위치 값
-        var scroll_top = $("body").scrollTop(); // 현재 스크롤 영역의 top 위치 값
+        var scroll_left = obj.scrollLeft(); // 현재 스크롤 영역의 left 위치 값		
+        var scroll_top = obj.scrollTop(); // 현재 스크롤 영역의 top 위치 값
         var scroll_right = scroll_left + $(window).width(); // 현재 스크롤 영역의 right 위치 값
         var scroll_bottom = scroll_top + $(window).height(); // 현재 스크롤 영역의 bottom 위치 값
 
@@ -148,6 +136,7 @@ ADDON_IPAPRIKA.JS = {
 
             // tts 순서 번호 데이터 추가
             var new_class = $(ipaprika_character_area).attr("class").replace(/-tts-item-idx-.*?-/g, "");
+			new_class = new_class.trim();
             new_class += " -tts-item-idx-" + tts_item_idx + "-";
             $(ipaprika_character_area).attr("class", new_class);
 
@@ -176,10 +165,15 @@ ADDON_IPAPRIKA.JS = {
 				c == "."
 				|| c == "!"
 				|| c == "?"
+				|| c == "。" // 일본어의 경우 마침표를 이런식으로 지정하기도 함..
 			) {
 
                 // 문장의 끝을 알리는 문자에 도달한 경우
 
+				// 다국어 TTS 지원으로 인해 기존 로직은 한글 TTS 에대해서만 정상 동작하기 때문에 아래 로직은 주석 처리함..
+				is_sentence_end = true;
+
+				/*
                 if (
 					tts_item_text.length > 2
 				) {
@@ -195,6 +189,7 @@ ADDON_IPAPRIKA.JS = {
                         is_sentence_end = true;
                     }
                 }
+				*/
             }
 
             tts_item_text += c;
@@ -224,23 +219,27 @@ ADDON_IPAPRIKA.JS = {
         });
         
         // TTS 대상 객체 반환 Json 문자열 생성
-        result_json += "[";
-        for (var idx = 0; idx < tts_item_idx; idx++) {
+		if (tts_item_idx > 0) {
+			
+			result_json += "[";
+			for (var idx = 0; idx < tts_item_idx; idx++) {
 
-            var ID = ".-tts-item-idx-" + idx + "-";
-            var TEXT = "";
-            content_root.find(ID).each(function () {
+				var ID = ".-tts-item-idx-" + idx + "-";
+				var TEXT = "";
+				content_root.find(ID).each(function () {
 
-                TEXT += $(this).text();
-            });
-            if (idx > 0) result_json += ",";
-            result_json += "{\"ID\": \"" + ID + "\", \"TEXT\": \"" + ADDON_IPAPRIKA.JS.convert_Json_Val(TEXT) + "\"}";
-        }
-        result_json += "]";
-
-        //result_json = JSON.parse(result_json); // Json 객체로 변환후 리턴하는게 최적이지만.. 여기서는 에러가 발생해서 실행되지 않는다.. 원인은 모르겠음.. -_-;
-
-        return result_json;
+					TEXT += $(this).text();
+				});
+				if (idx > 0) result_json += ",";
+				result_json += "{\"ID\": \"" + ID + "\", \"TEXT\": \"" + ADDON_IPAPRIKA.JS.convert_Json_Val(TEXT) + "\"}";
+			}
+			result_json += "]";
+		}
+		
+		if (result_json == "") result_json = "[]";
+			
+		//result_json = JSON.parse(result_json); // Json 객체로 변환후 리턴하는게 최적이지만.. 여기서는 에러가 발생해서 실행되지 않는다.. 원인은 모르겠음.. -_-;
+		return result_json;
     },
 
     /*****************************************************************
@@ -248,24 +247,27 @@ ADDON_IPAPRIKA.JS = {
     *****************************************************************/
     set_TTS_Item_Highlight: function (id) {
         
-        // 다른 형상은 보지못해서 모르겠지만..
-        // 샘플로 넘어온 html 에는 내용이 아래와 같은 태그 구조로 되어있었음..
-        //--------------------------------------------------------------------------------
-        //<div class="body">
-        //    <div id="chapter_32339" class="chapter">
-        //--------------------------------------------------------------------------------
-        // 혹시라도 다른 html 태그 내에 내용이 존재하는 경우 다르게 지정해야함!
-        var content_root = $(".body .chapter");
+        var content_root = $("body");
         
         // 모든 element 영역 하이라이트 해제
         content_root.find(".ipaprika_character_area").each(function () {
 
-            $(this).css("color", $(this).attr("ipaprika_def_color"));
+			var matches = $(this).attr("class").match(/-tts-def-color-.*?-/g);		
+			if (matches) {
+				var def_color = matches[0].replace("-tts-def-color-", "").replace("-", "");
+				$(this).css("color", def_color);
+			}
         });
 
         // 현재 element 영역 하이라이트 설정
         content_root.find(id).each(function () {
-            $(this).attr("ipaprika_def_color", $(this).css("color"));
+			var def_color = ADDON_IPAPRIKA.JS.convert_Color_Rgb_To_Hex($(this).css("color"));
+			
+            var new_class = $(this).attr("class").replace(/-tts-def-color-.*?-/g, "");
+			new_class = new_class.trim();
+            new_class += " -tts-def-color-" + def_color + "-";
+			
+            $(this).attr("class", new_class);
             $(this).css("color", "orange");
         });
     },
@@ -275,19 +277,16 @@ ADDON_IPAPRIKA.JS = {
     *****************************************************************/
     remove_TTS_All_Highlight: function () {
         
-        // 다른 형상은 보지못해서 모르겠지만..
-        // 샘플로 넘어온 html 에는 내용이 아래와 같은 태그 구조로 되어있었음..
-        //--------------------------------------------------------------------------------
-        //<div class="body">
-        //    <div id="chapter_32339" class="chapter">
-        //--------------------------------------------------------------------------------
-        // 혹시라도 다른 html 태그 내에 내용이 존재하는 경우 다르게 지정해야함!
-        var content_root = $(".body .chapter");
+        var content_root = $("body");
         
         // 모든 element 영역 하이라이트 해제
         content_root.find(".ipaprika_character_area").each(function () {
 
-            $(this).css("color", $(this).attr("ipaprika_def_color"));
+			var matches = $(this).attr("class").match(/-tts-def-color-.*?-/g);		
+			if (matches) {
+				var def_color = matches[0].replace("-tts-def-color-", "").replace("-", "");
+				$(this).css("color", def_color);
+			}
         });
     },
 
@@ -295,11 +294,14 @@ ADDON_IPAPRIKA.JS = {
     * TTS 다음 페이지로 이동
     *****************************************************************/
     move_TTS_Next_Page: function () {
+		
+		var obj = $(window);
 
         var is_last_page = false; // 마지막 페이지인지 여부
-        var move_scroll_left = $("body").scrollLeft() + $(window).width();
+        var move_scroll_left = obj.scrollLeft() + $(window).width();
         
-        $("body").animate({ scrollLeft: move_scroll_left }, 100);
+        //obj.animate({ scrollLeft: move_scroll_left }, 100); // 이걸로 하면 애니메이션 효과 때문에 부럽게 넘어가긴 하지만.. 대상 객체가 준비 상태가 아니면 동작하지 않는다.. 이런 상황은 너무 비일비재하니 차라리 사용하지 않는 편이 좋다..
+		window.scrollTo(move_scroll_left, 0);
 
         if (move_scroll_left + $(window).width() >= $(document).width()) is_last_page = true; // 마지막 페이지 임을 알림
 
@@ -317,5 +319,18 @@ ADDON_IPAPRIKA.JS = {
         result = result.replace(/\"/g, "\\\"\\\"");
 
         return result;
+    },
+
+    /*****************************************************************
+    * Json 데이터 입력 시, 입력되지 않는 금칙어 문자를 입력되도록 치환해주는 함수
+    *****************************************************************/
+    convert_Color_Rgb_To_Hex: function (rgb) {
+
+		var ctx = document.createElement('canvas').getContext('2d');
+		ctx.strokeStyle = rgb;
+		var hexColor = ctx.strokeStyle;
+		delete ctx;
+
+        return hexColor;
     }
 };
