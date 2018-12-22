@@ -72,9 +72,9 @@ function call_from_native_start(index) {
 }
 
 // 네이티브에서 읽기 완료시 호출
-function call_from_native_current_tts_finished(index) {
+function call_from_native_tts_page(index) {
     is_tts_text_reading = false;
-    tts_execute(index + 1);
+    tts_execute(index);
 }
 
 function call_from_native_next_page() {
