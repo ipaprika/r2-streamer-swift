@@ -19,7 +19,6 @@ function tts_ready(is_auto_page) {
     
     var result_json = ADDON_IPAPRIKA.JS.get_TTS_Json_List(); // TTS 대상 Json 문자열 가져오기
     tts_result_json = JSON.parse(result_json); // Json 객체로 변환 ('get_TTS_Json_List' 함수 내부로직에서 변환해주고 싶었지만 무슨 이유에서인지 에러가 발생함.. 그냥 알아서 변환해주도록..)
-    log('tts_ready');
     is_tts_ready_ing = false;
     call_to_native_tts_ready();
 }
@@ -45,9 +44,7 @@ function tts_execute(current_index) {
             } else {
                 setTimeout(function() {
                            tts_reset();
-                           log('tts_execute_reset');
                            tts_ready(is_tts_auto_page);
-                           log('tts_execute_ready');
                 }, 1000);
             }
         }
@@ -66,7 +63,6 @@ function tts_reset() {
     tts_result_json = null;
     is_tts_ready_ing = false;
     ADDON_IPAPRIKA.JS.remove_TTS_All_Highlight(); // 하이라이트 처리된 영역 초기화
-    log('tts_reset');
 }
 
 function log(string) {
@@ -86,7 +82,6 @@ function call_from_native_next_page() {
 
 function call_from_native_reset() {
     tts_reset();
-    log('call_from_native_reset');
 }
 
 function call_to_native_tts_ready() {
