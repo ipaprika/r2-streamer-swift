@@ -93,6 +93,11 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+*:not(input,textarea) {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none; /* Disable selection/Copy of UIWebView */
+}
+
 /* 1.5 being too loose with larger font-sizes, we reset headings to normal (which value is 1.125–1.375 for our font-stacks) */
 
 h1, h2, h3 {
