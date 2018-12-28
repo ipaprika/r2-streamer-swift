@@ -165,10 +165,15 @@ ADDON_IPAPRIKA.JS = {
 				c == "."
 				|| c == "!"
 				|| c == "?"
+				|| c == "。" // 일본어의 경우 마침표를 이런식으로 지정하기도 함..
 			) {
 
                 // 문장의 끝을 알리는 문자에 도달한 경우
 
+				// 다국어 TTS 지원으로 인해 기존 로직은 한글 TTS 에대해서만 정상 동작하기 때문에 아래 로직은 주석 처리함..
+				is_sentence_end = true;
+
+				/*
                 if (
 					tts_item_text.length > 2
 				) {
@@ -184,6 +189,7 @@ ADDON_IPAPRIKA.JS = {
                         is_sentence_end = true;
                     }
                 }
+				*/
             }
 
             tts_item_text += c;
@@ -199,10 +205,8 @@ ADDON_IPAPRIKA.JS = {
                     var new_class = $(ipaprika_character_area).attr("class").replace(/-tts-item-idx-.*?-/g, "");
                     $(ipaprika_character_area).attr("class", new_class);		
                 }
-                else {
-
-                    tts_item_idx++;
-                }
+				
+				tts_item_idx++;
             }
         }
 
@@ -213,23 +217,27 @@ ADDON_IPAPRIKA.JS = {
         });
         
         // TTS 대상 객체 반환 Json 문자열 생성
-        result_json += "[";
-        for (var idx = 0; idx < tts_item_idx; idx++) {
+		if (tts_item_idx > 0) {
+			
+			result_json += "[";
+			for (var idx = 0; idx <= tts_item_idx; idx++) {
 
-            var ID = ".-tts-item-idx-" + idx + "-";
-            var TEXT = "";
-            content_root.find(ID).each(function () {
+				var ID = ".-tts-item-idx-" + idx + "-";
+				var TEXT = "";
+				content_root.find(ID).each(function () {
 
-                TEXT += $(this).text();
-            });
-            if (idx > 0) result_json += ",";
-            result_json += "{\"ID\": \"" + ID + "\", \"TEXT\": \"" + ADDON_IPAPRIKA.JS.convert_Json_Val(TEXT) + "\"}";
-        }
-        result_json += "]";
-
-        //result_json = JSON.parse(result_json); // Json 객체로 변환후 리턴하는게 최적이지만.. 여기서는 에러가 발생해서 실행되지 않는다.. 원인은 모르겠음.. -_-;
-
-        return result_json;
+					TEXT += $(this).text();
+				});
+				if (idx > 0) result_json += ",";
+				result_json += "{\"ID\": \"" + ID + "\", \"TEXT\": \"" + ADDON_IPAPRIKA.JS.convert_Json_Val(TEXT) + "\"}";
+			}
+			result_json += "]";
+		}
+		
+		if (result_json == "") result_json = "[]";
+			
+		//result_json = JSON.parse(result_json); // Json 객체로 변환후 리턴하는게 최적이지만.. 여기서는 에러가 발생해서 실행되지 않는다.. 원인은 모르겠음.. -_-;
+		return result_json;
     },
 
     /*****************************************************************
