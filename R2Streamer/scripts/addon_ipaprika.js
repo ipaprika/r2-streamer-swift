@@ -1,7 +1,4 @@
-﻿/* '$.isOnScreen()' 함수 사용을 위한 스크립트로 현재 스크린 화면에 표시중인 객체인지 판단하는 기능임 */
-!function(a){a.fn.isOnScreen=function(b){var c=this.outerHeight(),d=this.outerWidth();if(!d||!c)return!1;var e=a(window),f={top:e.scrollTop(),left:e.scrollLeft()};f.right=f.left+e.width(),f.bottom=f.top+e.height();var g=this.offset();g.right=g.left+d,g.bottom=g.top+c;var h={top:f.bottom-g.top,left:f.right-g.left,bottom:g.bottom-f.top,right:g.right-f.left};return"function"==typeof b?b.call(this,h):h.top>0&&h.left>0&&h.right>0&&h.bottom>0}}(jQuery);
-
-var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
+﻿var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
 ADDON_IPAPRIKA.JS = {
 
@@ -37,20 +34,40 @@ ADDON_IPAPRIKA.JS = {
 				$(this).css("color", def_color);
 			}
         });
+		
+		var scroll_root = $(window);
 
         // TTS 커스텀 태그 영역 설정 함수
-        var set_TTS_Tag_Area = function (obj) {
+        var set_TTS_Tag_Area = function (obj_root) {
 
-            if (obj.attr("class").indexOf("ipaprika_character_area") > -1) return;
-            if (!obj.isOnScreen()) return;
-	
-            var character_left = obj.offset().left; // 현재 문자의 left 위치 값
-            var character_top = obj.offset().top; // 현재 문자의 top 위치 값
+            if (obj_root.attr("class").indexOf("ipaprika_character_area") > -1) return;
+			
+			// 'obj_root[0].getBoundingClientRect().left' 의 경우, 현재 스크롤 위치에서 왼쪽으로 벗어난 경우 마이너스 수치를 반환하고,
+			// 'obj_root[0].getBoundingClientRect().right' 의 경우, 현재 스크롤 위치에서 오른쪽으로 벗어난 경우 '$(window).width()' 보다 큰 값을 반환한다.
+			// 이런 부분을 활용해서 아래와 같이 현재 영역을 벗어났는지 체크하도록 하자!
+			
+			if (
+				obj_root[0].getBoundingClientRect().left < 0
+				&& obj_root[0].getBoundingClientRect().right < 0
+			) {
+				// 최측 영역을 벗어난 경우
+				
+				return;
+			}
+			
+			if (
+				obj_root[0].getBoundingClientRect().left > scroll_root.width()
+				&& obj_root[0].getBoundingClientRect().right > scroll_root.width()
+			) {
+				// 우측 영역을 벗어난 경우
+				
+				return;
+			}
 			
             var is_tag = false;
             var result_content_inner = "";
 
-            var arr_content_html_inner = obj.html().trim().split("");
+            var arr_content_html_inner = obj_root.html().trim().split("");
             arr_content_html_inner.forEach(function (c_inner) {
 
                 if (c_inner == "<") {
@@ -92,7 +109,7 @@ ADDON_IPAPRIKA.JS = {
             result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>l</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&lt;");
             result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>g</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&gt;");
 
-            obj.html(result_content_inner);
+            obj_root.html(result_content_inner);
         }
 		
         // TTS 커스텀 태그 영역 설정
@@ -111,52 +128,42 @@ ADDON_IPAPRIKA.JS = {
 			}
 		}
 		tts_TTS_Tag_Area_Proc(content_root);
-		
-		var obj = $(window);
-
-        var scroll_left = obj.scrollLeft(); // 현재 스크롤 영역의 left 위치 값		
-        var scroll_top = obj.scrollTop(); // 현재 스크롤 영역의 top 위치 값
-        var scroll_right = scroll_left + $(window).width(); // 현재 스크롤 영역의 right 위치 값
-        var scroll_bottom = scroll_top + $(window).height(); // 현재 스크롤 영역의 bottom 위치 값
 
         var tts_item_text = "";
         var tts_item_idx = 0;
 
         // TTS 커스텀 태그 영역에 설정된 인덱스 번호 속성 설정 함수
-        var set_TTS_Tag_Index = function (obj) {
-
-            var ipaprika_character_area = obj;
-
-            var character_left = $(ipaprika_character_area).offset().left; // 현재 문자의 left 위치 값
-            var character_top = $(ipaprika_character_area).offset().top; // 현재 문자의 top 위치 값
-
-            // 왼쪽 영역을 벗어난 문자일 경우
-            if (character_left < scroll_left) {
-                return true;
-            }
-
-            // 위쪽 영역을 벗어난 문자일 경우
-            if (character_top < scroll_top) {
-                return true;
-            }
-
-            // 오른쪽 영역을 벗어난 문자일 경우
-            if (character_left > scroll_right) {
-                return true;
-            }
-
-            // 아래쪽 영역을 벗어난 문자일 경우
-            if (character_top > scroll_bottom) {
-                return true;
-            }
+        var set_TTS_Tag_Index = function (obj_root) {
+			
+			// 'obj_root[0].getBoundingClientRect().left' 의 경우, 현재 스크롤 위치에서 왼쪽으로 벗어난 경우 마이너스 수치를 반환하고,
+			// 'obj_root[0].getBoundingClientRect().right' 의 경우, 현재 스크롤 위치에서 오른쪽으로 벗어난 경우 '$(window).width()' 보다 큰 값을 반환한다.
+			// 이런 부분을 활용해서 아래와 같이 현재 영역을 벗어났는지 체크하도록 하자!
+			
+			if (
+				obj_root[0].getBoundingClientRect().left < 0
+				&& obj_root[0].getBoundingClientRect().right < 0
+			) {
+				// 최측 영역을 벗어난 경우
+				
+				return;
+			}
+			
+			if (
+				obj_root[0].getBoundingClientRect().left > scroll_root.width()
+				&& obj_root[0].getBoundingClientRect().right > scroll_root.width()
+			) {
+				// 우측 영역을 벗어난 경우
+				
+				return;
+			}
 
             // tts 순서 번호 데이터 추가
-            var new_class = $(ipaprika_character_area).attr("class").replace(/-tts-item-idx-.*?-/g, "");
+            var new_class = $(obj_root).attr("class").replace(/-tts-item-idx-.*?-/g, "");
 			new_class = new_class.trim();
             new_class += " -tts-item-idx-" + tts_item_idx + "-";
-            $(ipaprika_character_area).attr("class", new_class);
+            $(obj_root).attr("class", new_class);
 
-            var c = $(ipaprika_character_area).text();
+            var c = $(obj_root).text();
 
             var is_sentence_end = false;
 
@@ -170,7 +177,7 @@ ADDON_IPAPRIKA.JS = {
                 is_sentence_end = true;
             }
 
-            if ($(ipaprika_character_area).attr("class").match(/-tts-item-end-/g)) {
+            if ($(obj_root).attr("class").match(/-tts-item-end-/g)) {
 
                 // 문장의 종료를 알리는 라인피드 영역일 경우
 
@@ -218,8 +225,8 @@ ADDON_IPAPRIKA.JS = {
                 var tts_item_temp = content_root.find(".-tts-item-idx-" + tts_item_idx + "-");
                 if (tts_item_temp.text().trim() == "") {
 
-                    var new_class = $(ipaprika_character_area).attr("class").replace(/-tts-item-idx-.*?-/g, "");
-                    $(ipaprika_character_area).attr("class", new_class);		
+                    var new_class = $(obj_root).attr("class").replace(/-tts-item-idx-.*?-/g, "");
+                    $(obj_root).attr("class", new_class);		
                 }
                 else {
 
@@ -238,7 +245,7 @@ ADDON_IPAPRIKA.JS = {
 		if (tts_item_idx > 0) {
 			
 			result_json += "[";
-			for (var idx = 0; idx < tts_item_idx; idx++) {
+			for (var idx = 0; idx <= tts_item_idx; idx++) {
 
 				var ID = ".-tts-item-idx-" + idx + "-";
 				var TEXT = "";
@@ -317,7 +324,7 @@ ADDON_IPAPRIKA.JS = {
         var move_scroll_left = obj.scrollLeft() + $(window).width();
         
         //obj.animate({ scrollLeft: move_scroll_left }, 100); // 이걸로 하면 애니메이션 효과 때문에 부럽게 넘어가긴 하지만.. 대상 객체가 준비 상태가 아니면 동작하지 않는다.. 이런 상황은 너무 비일비재하니 차라리 사용하지 않는 편이 좋다..
-		window.scrollTo(move_scroll_left, 0);
+		window.scrollTo(move_scroll_left, 0);						
 
         if (move_scroll_left + $(window).width() >= $(document).width()) is_last_page = true; // 마지막 페이지 임을 알림
 
