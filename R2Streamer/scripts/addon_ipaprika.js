@@ -4,10 +4,9 @@ ADDON_IPAPRIKA.JS = {
 
     /*****************************************************************
     * TTS 대상 객체 Json 목록 가져오기
-    * V 2019.01.08.01 KJY
     *****************************************************************/
     get_TTS_Json_List: function () {
-        
+		
         // TTS 대상 객체 Json 문자열은 아래와 같은 형태로 반환된다.
         //--------------------------------------------------------------------------------
         //[
@@ -40,7 +39,9 @@ ADDON_IPAPRIKA.JS = {
 
         // TTS 커스텀 태그 영역 설정 함수
         var set_TTS_Tag_Area = function (obj_root) {
-
+			
+			if (!obj_root) return;
+			if (!obj_root.attr("class")) return;
             if (obj_root.attr("class").indexOf("ipaprika_character_area") > -1) return;
 			
 			// 'obj_root[0].getBoundingClientRect().left' 의 경우, 현재 스크롤 위치에서 왼쪽으로 벗어난 경우 마이너스 수치를 반환하고,
