@@ -1,3 +1,5 @@
+﻿/* '$.isOnScreen()' 함수 사용을 위한 스크립트로 현재 스크린 화면에 표시중인 객체인지 판단하는 기능임 */
+!function(a){a.fn.isOnScreen=function(b){var c=this.outerHeight(),d=this.outerWidth();if(!d||!c)return!1;var e=a(window),f={top:e.scrollTop(),left:e.scrollLeft()};f.right=f.left+e.width(),f.bottom=f.top+e.height();var g=this.offset();g.right=g.left+d,g.bottom=g.top+c;var h={top:f.bottom-g.top,left:f.right-g.left,bottom:g.bottom-f.top,right:g.right-f.left};return"function"==typeof b?b.call(this,h):h.top>0&&h.left>0&&h.right>0&&h.bottom>0}}(jQuery);
 
 var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
@@ -39,9 +41,12 @@ ADDON_IPAPRIKA.JS = {
         // TTS 커스텀 태그 영역 설정 함수
         var set_TTS_Tag_Area = function (obj) {
 
-            if (obj.html().indexOf("ipaprika_character_area") > -1) return;
-            if (!obj.is(":visible")) return;
-
+            if (obj.attr("class").indexOf("ipaprika_character_area") > -1) return;
+            if (!obj.isOnScreen()) return;
+	
+            var character_left = obj.offset().left; // 현재 문자의 left 위치 값
+            var character_top = obj.offset().top; // 현재 문자의 top 위치 값
+			
             var is_tag = false;
             var result_content_inner = "";
 
@@ -89,12 +94,23 @@ ADDON_IPAPRIKA.JS = {
 
             obj.html(result_content_inner);
         }
-
+		
         // TTS 커스텀 태그 영역 설정
-        content_root.children().each(function () {
-
-			set_TTS_Tag_Area($(this)); // TTS 커스텀 태그 영역 설정
-        });
+		var tts_TTS_Tag_Area_Proc = function(tag_obj) {
+			
+			if (tag_obj.children().length > 0) {
+				
+				tag_obj.children().each(function () {
+					
+					tts_TTS_Tag_Area_Proc($(this));
+				});
+			}
+			else {
+				
+				set_TTS_Tag_Area(tag_obj); // TTS 커스텀 태그 영역 설정
+			}
+		}
+		tts_TTS_Tag_Area_Proc(content_root);
 		
 		var obj = $(window);
 
@@ -205,8 +221,10 @@ ADDON_IPAPRIKA.JS = {
                     var new_class = $(ipaprika_character_area).attr("class").replace(/-tts-item-idx-.*?-/g, "");
                     $(ipaprika_character_area).attr("class", new_class);		
                 }
-				
-				tts_item_idx++;
+                else {
+
+                    tts_item_idx++;
+                }
             }
         }
 
@@ -220,7 +238,7 @@ ADDON_IPAPRIKA.JS = {
 		if (tts_item_idx > 0) {
 			
 			result_json += "[";
-			for (var idx = 0; idx <= tts_item_idx; idx++) {
+			for (var idx = 0; idx < tts_item_idx; idx++) {
 
 				var ID = ".-tts-item-idx-" + idx + "-";
 				var TEXT = "";
