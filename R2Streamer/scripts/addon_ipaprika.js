@@ -1,4 +1,4 @@
-﻿// version 1
+﻿// version 2
 
 var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
@@ -43,28 +43,6 @@ ADDON_IPAPRIKA.JS = {
         var set_TTS_Tag_Area = function (obj_root) {
 			
 			if (obj_root.html().indexOf("ipaprika_character_area") > -1) return;
-			
-			// 'obj_root[0].getBoundingClientRect().left' 의 경우, 현재 스크롤 위치에서 왼쪽으로 벗어난 경우 마이너스 수치를 반환하고,
-			// 'obj_root[0].getBoundingClientRect().right' 의 경우, 현재 스크롤 위치에서 오른쪽으로 벗어난 경우 '$(window).width()' 보다 큰 값을 반환한다.
-			// 이런 부분을 활용해서 아래와 같이 현재 영역을 벗어났는지 체크하도록 하자!
-			
-			if (
-				obj_root[0].getBoundingClientRect().left < 0
-				&& obj_root[0].getBoundingClientRect().right < 0
-			) {
-				// 최측 영역을 벗어난 경우
-				
-				return;
-			}
-			
-			if (
-				obj_root[0].getBoundingClientRect().left > scroll_root.width()
-				&& obj_root[0].getBoundingClientRect().right > scroll_root.width()
-			) {
-				// 우측 영역을 벗어난 경우
-				
-				return;
-			}
 			
             var is_tag = false;
             var result_content_inner = "";
