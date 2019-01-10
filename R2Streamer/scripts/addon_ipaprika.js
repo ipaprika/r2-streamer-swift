@@ -1,4 +1,4 @@
-﻿// version 2
+﻿// version 3
 
 var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
@@ -89,11 +89,19 @@ ADDON_IPAPRIKA.JS = {
             result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>l</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&lt;");
             result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>g</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&gt;");
 
-            obj_root.html(result_content_inner);
+			// 각주와 같은 텍스트의 경우, 현재 화면 상/하위에 숨겨져 있는 영역에 있는데.. 위에서 위치값 체크해서 skip 하도록 하면 가장 나이스하지만.. 위치값 체크하는 로직을 추가하면 IOS 에서 무슨에서인지 속도가 엄청 느려짐..
+			// 그냥 try ~ catch 절로 묶어서 예외 발생하면 그냥 넘어가도록 처리!
+			try {
+				obj_root.html(result_content_inner);
+			}
+			catch { }
         }
 		
 		// TTS 커스텀 태그 영역 설정
-		set_TTS_Tag_Area(content_root);
+        content_root.children().each(function () {
+			
+            set_TTS_Tag_Area($(this)); // TTS 커스텀 태그 영역에 설정된 인덱스 번호 속성 설정
+        });
 		
         var tts_item_text = "";
         var tts_item_idx = 0;
