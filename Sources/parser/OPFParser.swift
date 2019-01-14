@@ -75,7 +75,7 @@ final public class OPFParser {
         let metadataElement = document["package"]["metadata"]
         
         // Title.
-        guard let multilangTitle = MetadataParser.mainTitle(from: metadataElement) 
+        let multilangTitle = MetadataParser.mainTitle(from: metadataElement) 
         metadata.multilangTitle = multilangTitle
         
         // Subtitle.
