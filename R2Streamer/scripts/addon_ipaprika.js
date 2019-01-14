@@ -1,4 +1,4 @@
-﻿// version 4
+﻿// version 3
 
 var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
@@ -84,15 +84,17 @@ ADDON_IPAPRIKA.JS = {
                 return this.split(org).join(dest);
             }
 
-            // 이거 치환해주지 않으면 '&nbsp;', '&lt;', '&gt;', '&amp;', '&quot;' 라는 문자 하나 하나에도 span 태그로 묶여서 텍스트 그대로 표시됨.. (간혹 '.html()' 함수에 값을 넣었을때 예외가 발생하기도 한다.. 조심하자..)
-			// 참고로 이런 스타일의 특수 문자들을 'HTML Character Entity(HTML 문자 단위(엔티티))'라고 함..
-            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>n</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>b</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>s</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>p</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&nbsp;</span>");
-            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>l</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&lt;</span>");
-            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>g</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&gt;</span>");
-            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>a</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>m</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>p</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&amp;</span>");
-            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>q</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>u</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>o</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&quot;</span>");
+            // 이거 치환해주지 않으면 '&nbsp;', '&lt;', '&gt;' 라는 문자 하나 하나에도 span 태그로 묶여서 텍스트 그대로 표시됨..
+            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>n</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>b</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>s</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>p</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&nbsp;");
+            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>l</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&lt;");
+            result_content_inner = result_content_inner.replaceAll("<span class='ipaprika_character_area' style='padding:0px; margin:0px;'>&</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>g</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>t</span><span class='ipaprika_character_area' style='padding:0px; margin:0px;'>;</span>", "&gt;");
 
-			obj_root.html(result_content_inner);
+			// 각주와 같은 텍스트의 경우, 현재 화면 상/하위에 숨겨져 있는 영역에 있는데.. 위에서 위치값 체크해서 skip 하도록 하면 가장 나이스하지만.. 위치값 체크하는 로직을 추가하면 IOS 에서 무슨에서인지 속도가 엄청 느려짐..
+			// 그냥 try ~ catch 절로 묶어서 예외 발생하면 그냥 넘어가도록 처리!
+			try {
+				obj_root.html(result_content_inner);
+			}
+			catch { }
         }
 		
 		// TTS 커스텀 태그 영역 설정
