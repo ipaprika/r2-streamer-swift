@@ -75,7 +75,11 @@ final public class OPFParser {
         let metadataElement = document["package"]["metadata"]
         
         // Title.
+<<<<<<< HEAD
         guard let multilangTitle = MetadataParser.mainTitle(from: metadataElement) else {throw OPFParserError.missingPublicationTitle }
+=======
+        let multilangTitle = MetadataParser.mainTitle(from: metadataElement) 
+>>>>>>> parent of c80b213... 바꿔도 안되는 컨텐츠는 않되어서 다시 원복
         metadata.multilangTitle = multilangTitle
         
         // Subtitle.
