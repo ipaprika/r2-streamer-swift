@@ -415,6 +415,7 @@
 			shellScript = "#/usr/local/bin/carthage copy-frameworks\n";
 			shellScript = "/usr/local/bin/carthage copy-frameworks";
 			shellScript = "#/usr/local/bin/carthage copy-frameworks";
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
