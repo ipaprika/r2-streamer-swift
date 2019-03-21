@@ -1,4 +1,4 @@
-github "readium/r2-shared-swift" "develop"
+github "ipaprika/r2-shared-swift" "feature/upstream_merge_fix"
 github "tadija/AEXML" == 4.3.3
 github "swisspol/GCDWebServer" == 3.5.2
 github "krzyzanowskim/CryptoSwift" == 0.14.0

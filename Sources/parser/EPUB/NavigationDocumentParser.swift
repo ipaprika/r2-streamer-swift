@@ -16,7 +16,7 @@ import Fuzi
 /// The navigation document if documented here at Navigation
 /// https://idpf.github.io/a11y-guidelines/
 final public class NavigationDocumentParser {
-
+    
     /// Return the data representation of the table of contents informations
     /// contained in the Navigation Document (toc).
     ///
@@ -34,18 +34,15 @@ final public class NavigationDocumentParser {
         let elements = document.xpath(xpath)
         
         for element in elements {
-            guard let href = element.attr("href") else {
-                continue
-            }
-            newTableOfContents.append(Link(
-                href: normalize(base: path, href: href),
-                title: element.stringValue
-            ))
+            let link = Link()
+            link.title = element.stringValue
+            link.href = normalize(base: path, href: element.attr("href"))
+            newTableOfContents.append(link)
         }
         
         return newTableOfContents
     }
-
+    
     /// Return the data representation of the page-list informations
     /// contained in the Navigation Document.
     ///
@@ -55,10 +52,10 @@ final public class NavigationDocumentParser {
                                   locatedAt path: String) -> [Link] {
         let newPageList = nodeArray(forNavigationDocument: document,
                                     locatedAt: path, havingNavType: "page-list")
-
+        
         return newPageList
     }
-
+    
     /// Return the data representation of the landmarks informations
     /// contained in the Navigation Document.
     ///
@@ -68,10 +65,10 @@ final public class NavigationDocumentParser {
                                    locatedAt path: String) -> [Link] {
         let newLandmarks = nodeArray(forNavigationDocument: document,
                                      locatedAt: path, havingNavType: "landmarks")
-
+        
         return newLandmarks
     }
-
+    
     /// Return the data representation of the list of illustrations informations
     /// contained in the Navigation Document (loi).
     ///
@@ -81,10 +78,10 @@ final public class NavigationDocumentParser {
                                              locatedAt path: String) -> [Link] {
         let newListOfIllustrations = nodeArray(forNavigationDocument: document,
                                                locatedAt: path, havingNavType: "loi")
-
+        
         return newListOfIllustrations
     }
-
+    
     /// Return the data representation of the list of tables informations
     /// contained in the Navigation Document (lot).
     ///
@@ -94,10 +91,10 @@ final public class NavigationDocumentParser {
                                       locatedAt path: String) -> [Link] {
         let newListOfTables = nodeArray(forNavigationDocument: document,
                                         locatedAt: path, havingNavType: "lot")
-
+        
         return newListOfTables
     }
-
+    
     /// Return the data representation of the list of tables informations
     /// contained in the Navigation Document (lot).
     ///
@@ -107,10 +104,10 @@ final public class NavigationDocumentParser {
                                           locatedAt path: String) -> [Link] {
         let newListOfAudiofiles = nodeArray(forNavigationDocument: document,
                                             locatedAt: path, havingNavType: "loa")
-
+        
         return newListOfAudiofiles
     }
-
+    
     /// Return the data representation of the list of tables informations
     /// contained in the Navigation Document (lot).
     ///
@@ -120,12 +117,12 @@ final public class NavigationDocumentParser {
                                       locatedAt path: String) -> [Link] {
         let newListOfVideos = nodeArray(forNavigationDocument: document,
                                         locatedAt: path, havingNavType: "lov")
-
+        
         return newListOfVideos
     }
-
+    
     // MARK: Fileprivate Methods.
-
+    
     /// Generate an array of Link elements representing the XML structure of the
     /// navigation document. Each of them possibly having children.
     ///
@@ -139,7 +136,9 @@ final public class NavigationDocumentParser {
                                       locatedAt path: String,
                                       havingNavType navType: String) -> [Link]
     {
+        var nodeTree = Link()
         var body = document["nav"]["body"]["section"]
+        
         if body.error == AEXMLError.elementNotFound {
             body = document["nav"]["body"]
         }
@@ -153,38 +152,64 @@ final public class NavigationDocumentParser {
             return []
         }
         // Convert the XML element to a `Link` object. Recursive.
-        return nodeArray(usingNavigationDocumentOl: olElement, path)
+        nodeTree = node(usingNavigationDocumentOl: olElement, path)
+        
+        return nodeTree.children
     }
-
+    
     /// [RECURSIVE]
-    /// Create a nodes list (`[Link]`) from a <ol> element, filling the nodes'
+    /// Create a node(`Link`) from a <ol> element, filling the node
     /// children with nested <li> elements if any.
     /// If there are nested <ol> elements, recursively handle them.
     ///
     /// - Parameter element: The <ol> from the Navigation Document.
-    /// - Returns: The generated nodes list.
-    static fileprivate func nodeArray(usingNavigationDocumentOl element: AEXMLElement, _ navigationDocumentPath: String) -> [Link] {
+    /// - Returns: The generated node(`Link`).
+    static fileprivate func node(usingNavigationDocumentOl element: AEXMLElement,
+                                 _ navigationDocumentPath: String) -> Link {
+        let newOlNode = Link()
+        
         // Retrieve the children <li> elements of the <ol>.
-        return (element["li"].all ?? [])
-            .map { li in
-                // FIXME: href is required for Link, but sometimes nested <ol> don't have any href. We need a proper Navigation tree structure instead of relying on `Link`.
-                let link = Link(href: "#")
-                
-                let a = li["a"]
-                if let href = a.attributes["href"] {
-                    link.href = normalize(base: navigationDocumentPath, href: href)
-                    link.title = a["span"].value ?? a.value
-                } else {
-                    link.title = li["span"].value
+        guard let liElements = element["li"].all else {
+            return newOlNode
+        }
+        // For each <li>.
+        for li in liElements {
+            // Check if the <li> contains a <span> whom text value is not empty.
+            if let spanText = li["span"].value, !spanText.isEmpty {
+                // Retrieve the <ol> inside the <span> and do a recursive call.
+                if let nextOl = li["ol"].first {
+                    newOlNode.children.append(node(usingNavigationDocumentOl: nextOl, navigationDocumentPath))
                 }
+            } else {
+                let childLiNode = node(usingNavigationDocumentLi: li, navigationDocumentPath)
                 
-                // If the <li> contains a nested <ol>, then we need to build the links recursively
-                if let childOl = li["ol"].first {
-                    link.children = nodeArray(usingNavigationDocumentOl: childOl, navigationDocumentPath)
-                }
-                
-                return link
+                newOlNode.children.append(childLiNode)
             }
+        }
+        return newOlNode
     }
-
+    
+    /// [RECURSIVE]
+    /// Create a node(`Link`) from a <li> element.
+    /// If there is a nested <ol> element, recursively handle it.
+    ///
+    /// - Parameter element: The <ol> from the Navigation Document.
+    /// - Returns: The generated node(`Link`).
+    static fileprivate func node(usingNavigationDocumentLi element: AEXMLElement,
+                                 _ navigationDocumentPath: String) -> Link {
+        let newLiNode = Link ()
+        var title = element["a"]["span"].value
+        
+        if title == nil {
+            title = element["a"].value
+        }
+        newLiNode.href = normalize(base: navigationDocumentPath, href: element["a"].attributes["href"])
+        newLiNode.title = title
+        // If the <li> have a child <ol>.
+        if let nextOl = element["ol"].first {
+            // If a nested <ol> is found, insert it into the newNode childrens.
+            newLiNode.children.append(node(usingNavigationDocumentOl: nextOl, navigationDocumentPath))
+        }
+        return newLiNode
+    }
 }

@@ -49,10 +49,10 @@ public enum MediaType: String {
 
 /// CBZ publication parsing class.
 public class CbzParser: PublicationParser {
-
+    
     @available(*, deprecated, message: "Use the static method `CbzParser.parse()` instead of instantiationg `CbzParser`")
     public init() {}
-
+    
     @available(*, deprecated, message: "Use the static method `CbzParser.parse()` instead of instantiationg `CbzParser`")
     public func parse(fileAtPath path: String) throws -> PubBox {
         // For legacy reason this parser used to be instantiated, compared to EPUBParser
@@ -66,9 +66,35 @@ public class CbzParser: PublicationParser {
     /// - Returns: The resulting `PubBox` object.
     /// - Throws: Throws `CbzParserError.missingFile`.
     public static func parse(fileAtPath path: String) throws -> (PubBox, PubParsingCallback) {
-        let container = try generateContainerFrom(fileAtPath: path)
-        let publication = parsePublication(in: container, at: path)
-
+        // Generate the `Container` for `fileAtPath`.
+        let container: CBZContainer = try generateContainerFrom(fileAtPath: path)
+        let publication = Publication()
+        
+        publication.updatedDate = container.modificationDate
+        publication.metadata.multilangTitle = title(from: path)
+        publication.metadata.identifier = path
+        publication.internalData["type"] = "cbz"
+        publication.internalData["rootfile"] = container.rootFile.rootFilePath
+        
+        var addedCover = false
+        for (index, filename) in container.files.enumerated() {
+            let link = Link()
+            
+            guard let mediaType = MediaType(filename: filename) else {
+                continue
+            }
+            link.typeLink = mediaType.rawValue
+            
+            // First valid resource is cover.
+            if !addedCover {
+                link.rel.append("cover")
+                addedCover = true
+            }
+            
+            link.href = normalize(base: container.rootFile.rootFilePath, href: filename)
+            publication.readingOrder.append(link)
+        }
+        
         func didLoadDRM(drm: DRM?) {
             container.drm = drm
         }
@@ -76,33 +102,20 @@ public class CbzParser: PublicationParser {
         return ((publication, container), didLoadDRM)
     }
     
-    private static func parsePublication(in container: CBZContainer, at path: String) -> Publication {
-        let publication = Publication(
-            type: CbzConstant.mimetype,
-            metadata: Metadata(
-                identifier: path,
-                title: URL(fileURLWithPath: path)
-                    .lastPathComponent
-                    .replacingOccurrences(of: "_", with: " ")
-            ),
-            readingOrder: container.files
-                .compactMap { filename in
-                    guard let mediaType = MediaType(filename: filename) else {
-                        return nil
-                    }
-                    return Link(
-                        href: normalize(base: container.rootFile.rootFilePath, href: filename),
-                        type: mediaType.rawValue
-                    )
-                }
-        )
+    /// Generate a MultilangString title from the publication at `path`.
+    ///
+    /// - Parameter path: The path of the publication.
+    /// - Returns: The resulting MultilangString.
+    private static func title(from path: String) -> MultilangString {
+        let fileUrl = URL(fileURLWithPath: path)
+        let multilangString = MultilangString()
+        let filename = fileUrl.lastPathComponent
+        let title = filename.replacingOccurrences(of: "_", with: " ")
         
-        // First valid resource is the cover.
-        publication.readingOrder.first?.rels.append("cover")
-        
-        return publication
+        multilangString.singleString = title
+        return multilangString
     }
-
+    
     /// Generate a Container instance for the file at `fileAtPath`. It handles
     /// 2 cases, CBZ files and CBZ epub directories.
     ///
@@ -112,7 +125,7 @@ public class CbzParser: PublicationParser {
     private static func generateContainerFrom(fileAtPath path: String) throws -> CBZContainer {
         var container: CBZContainer?
         var isDirectory: ObjCBool = false
-
+        
         guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) else {
             throw CbzParserError.missingFile(path: path)
         }
@@ -127,5 +140,5 @@ public class CbzParser: PublicationParser {
         }
         return containerUnwrapped
     }
-
+    
 }

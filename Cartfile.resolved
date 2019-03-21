@@ -1,6 +1,6 @@
 github "cezheng/Fuzi" "2.1.0"
 github "dexman/Minizip" "1.4.0"
+github "ipaprika/r2-shared-swift" "a88f1571b7ff35e37bcce3e6449953c39774c3fa"
 github "krzyzanowskim/CryptoSwift" "0.14.0"
-github "readium/r2-shared-swift" "678dbfede1e24ea5b924955176a331206b1a4450"
 github "swisspol/GCDWebServer" "3.5.2"
 github "tadija/AEXML" "4.3.3"

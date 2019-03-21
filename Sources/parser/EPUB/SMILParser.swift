@@ -53,11 +53,16 @@ final internal class SMILParser {
                 parent.children.append(newNode)
                 continue
             }
-            guard let link = readingOrder.first(where: { $0.href.contains(baseHref) || baseHref.contains($0.href) }) else {
+            guard let link = readingOrder.first(where: {
+                guard let linkRef = $0.href else {
+                    return false
+                }
+                return linkRef.contains(baseHref) || baseHref.contains(linkRef)
+            }) else {
                 continue
             }
             link.mediaOverlays.append(newNode)
-            link.properties.mediaOverlay = EpubConstant.mediaOverlayURL + link.href
+            link.properties.mediaOverlay = EpubConstant.mediaOverlayURL + link.href!
         }
     }
     
@@ -141,7 +146,7 @@ final internal class SMILParser {
         
         var newClip = Clip()
         newClip.relativeUrl = audioURL
-    
+        
         newClip.start = timeBegin
         newClip.end = timeEnd
         

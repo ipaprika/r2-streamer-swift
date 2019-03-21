@@ -81,19 +81,19 @@ final internal class ContentFiltersEpub: ContentFilters {
         decodedInputStream = FontDecoder.decoding(decodedInputStream,
                                                   of: resourceLink,
                                                   publication.metadata.identifier)
-    
+        
         // Inject additional content in the resource if test succeed.
         // if type == "application/xhtml+xml"
         //   if (publication layout is 'reflow' &&  resource is `not specified`)
         //     || resource is 'reflow'
         //       - inject pagination
         if let link = publication.link(withHref: path),
-            ["application/xhtml+xml", "text/html"].contains(link.type),
-            let baseUrl = publication.baseURL?.deletingLastPathComponent()
+            link.typeLink == "application/xhtml+xml" || link.typeLink == "text/html",
+            let baseUrl = publication.baseUrl?.deletingLastPathComponent()
         {
-            if publication.metadata.rendition?.layout == .reflowable
+            if publication.metadata.rendition.layout == .reflowable
                 && link.properties.layout == nil
-                || link.properties.layout == .reflowable
+                || link.properties.layout == "reflowable"
             {
                 decodedInputStream = injectReflowableHtml(in: decodedInputStream, for: publication)
             } else {
@@ -153,7 +153,7 @@ final internal class ContentFiltersEpub: ContentFilters {
             abort()
         }
         
-        guard let baseUrl = publication.baseURL?.deletingLastPathComponent() else {
+        guard let baseUrl = publication.baseUrl?.deletingLastPathComponent() else {
             print("Invalid host")
             abort()
         }
@@ -161,13 +161,18 @@ final internal class ContentFiltersEpub: ContentFilters {
         //publication.metadata.primaryContentLayout
         guard let document = try? XMLDocument(string: resourceHtml) else {return stream}
         
-        let language = document.root?.attr("lang")
-        let contentLayout = publication.contentLayout(forLanguage: language)
-        let styleSubFolder = contentLayout.rawValue
+        let langAttribute = document.root?.attr("lang")
+        let langType = LangType(rawString: langAttribute ?? "")
         
-        let primaryContentLayout = publication.contentLayout
-        if let preset = userSettingsUIPreset[primaryContentLayout] {
-            publication.userSettingsUIPreset = preset
+        let readingProgression = publication.metadata.readingProgression
+        let contentLayoutStyle = Metadata.contentlayoutStyle(for: langType, readingProgression: readingProgression)
+        
+        let styleSubFolder = contentLayoutStyle.rawValue
+        
+        if let primaryContentLayout = publication.metadata.primaryContentLayout {
+            if let preset = userSettingsUIPreset[primaryContentLayout] {
+                publication.userSettingsUIPreset = preset
+            }
         }
         
         let cssBefore = getHtmlLink(forResource: "\(baseUrl)styles/\(styleSubFolder)/ReadiumCSS-before.css")

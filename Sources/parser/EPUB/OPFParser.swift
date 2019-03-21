@@ -53,135 +53,197 @@ final public class OPFParser {
                                   with rootFilePath: String,
                                   and epubVersion: Double) throws -> Publication
     {
-        let manifestLinks = parseManifestLinks(from: document, rootFilePath)
-        let readingOrder = parseReadingOrder(from: document, manifestLinks: manifestLinks)
-        // The resources should only contain the links that are not already in the readingOrder
-        let resources = manifestLinks.filter { !readingOrder.contains($0) }
-        
-        return Publication(
-            type: EpubConstant.mimetype,
-            formatVersion: String(epubVersion),
-            metadata: try parseMetadata(from: document, epubVersion: epubVersion),
-            readingOrder: readingOrder,
-            resources: resources
-        )
+        /// The 'to be built' Publication.
+        var publication = Publication()
+        publication.version = epubVersion
+        publication.internalData["type"] = "epub"
+        publication.internalData["rootfile"] = rootFilePath
+        try parseMetadata(from: document, to: &publication)
+        parseResources(from: document["package"]["manifest"], to: &publication, rootFilePath)
+        coverLinkFromMeta(from: document["package"]["metadata"], to: &publication)
+        parseReadingOrder(from: document["package"], to: &publication)
+        return publication
     }
-
+    
     /// Parse the Metadata in the XML <metadata> element.
     ///
     /// - Parameter document: Parse the Metadata in the XML <metadata> element.
-    static internal func parseMetadata(from document: AEXMLDocument, epubVersion: Double) throws -> Metadata {
+    /// - Returns: The Metadata object representing the XML <metadata> element.
+    static internal func parseMetadata(from document: AEXMLDocument, to publication: inout Publication) throws {
+        /// The 'to be returned' Metadata object.
+        var metadata = Metadata()
         let metadataElement = document["package"]["metadata"]
-        guard let title = MetadataParser.mainTitle(from: metadataElement) else {
+        
+        // Title.
+        guard let multilangTitle = MetadataParser.mainTitle(from: metadataElement) else {
             throw OPFParserError.missingPublicationTitle
         }
-
-        var metadata = Metadata(
-            identifier: MetadataParser.uniqueIdentifier(from: document),
-            title: title,
-            subtitle: MetadataParser.subTitle(from: metadataElement),
-            modified: MetadataParser.modifiedDate(from: metadataElement),
-            published: MetadataParser.publishedDate(from: metadataElement),
-            languages: metadataElement["dc:language"].all?.map { $0.string } ?? [],
-            subjects: MetadataParser.subjects(from: metadataElement),
-            readingProgression: MetadataParser.parseReadingProgression(from: document),
-            description: metadataElement["dc:description"].value,
-            otherMetadata: [
-                "source": metadataElement["dc:source"].value ?? "",
-                "rights": metadataElement["dc:rights"].all?
-                    .map { $0.string }.joined(separator: " ") ?? ""
-            ]
-        )
-
-        MetadataParser.parseContributors(from: metadataElement, to: &metadata, epubVersion)
-        metadata.rendition = MetadataParser.parseRenditionProperties(from: metadataElement)
+        metadata.multilangTitle = multilangTitle
         
-        return metadata
+        // Subtitle.
+        let multilangSubtitle = MetadataParser.subTitle(from: metadataElement)
+        metadata.multilangSubtitle = multilangSubtitle
+        
+        // Identifier.
+        metadata.identifier = MetadataParser.uniqueIdentifier(from: metadataElement,
+                                                              with: document["package"].attributes)
+        // Description.
+        if let description = metadataElement["dc:description"].value {
+            metadata.description = description
+        }
+        // From the EPUB 2 and EPUB 3 specifications, only the `dc:date` element without any attribtes will be considered for the `published` property.
+        // And only the string with full date will be considered as valid date string. The string format validation happens in the `setter` of `published`.
+        if let dateString = metadataElement["dc:date"].all?.filter({ (thisElement) -> Bool in
+            return thisElement.attributes.count == 0
+        }).first?.value {
+            metadata.published = dateString
+        }
+        // Last modification date.
+        metadata.modified = MetadataParser.modifiedDate(from: metadataElement)
+        // Source.
+        if let source = metadataElement["dc:source"].value {
+            metadata.source = source
+        }
+        // Subject.
+        if let subject = MetadataParser.subject(from: metadataElement) {
+            metadata.subjects.append(subject)
+        }
+        // Languages.
+        if let languages = metadataElement["dc:language"].all {
+            metadata.languages = languages.map({ $0.string })
+        }
+        // Rights.
+        if let rights = metadataElement["dc:rights"].all {
+            metadata.rights = rights.map({ $0.string }).joined(separator: " ")
+        }
+        // Publishers, Creators, Contributors.
+        let epubVersion = publication.version
+        MetadataParser.parseContributors(from: metadataElement, to: &metadata, epubVersion)
+        // Page progression direction.
+        
+        if let readingProgression = document["package"]["readingOrder"].attributes["page-progression-direction"] {
+            metadata.readingProgression = ReadingProgression(rawString: readingProgression)
+        } else if let readingProgression = document["package"]["spine"].attributes["page-progression-direction"] {
+            metadata.readingProgression = ReadingProgression(rawString: readingProgression)
+        } else {
+            let langType = LangType(rawString: metadata.languages.first ?? "")
+            let rawDirection = Metadata.contentlayoutStyle(for: langType, readingProgression: nil).rawValue
+            metadata.readingProgression = ReadingProgression(rawString: rawDirection)
+        }
+        
+        // Rendition properties.
+        MetadataParser.parseRenditionProperties(from: metadataElement, to: &metadata)
+        publication.metadata = metadata
+        /// Other Metadata.
+        // Media overlays: media:duration
+        MetadataParser.parseMediaDurations(from: metadataElement, to: &metadata.otherMetadata)
     }
-
-    /// Parses XML elements of the <Manifest> in the package.opf file as a list of `Link`.
+    
+    /// Parse XML elements of the <Manifest> in the package.opf file.
+    /// Temporarily store the XML elements ids into the `.title` property of the
+    /// `Link` created for each element.
     ///
     /// - Parameters:
     ///   - manifest: The Manifest XML element.
-    ///   - metadata: The metadata XML element.
+    ///   - publication: The `Publication` object with `.resource` properties to
+    ///                  fill.
     ///   - coverId: The coverId to identify the cover ressource and tag it.
-    static internal func parseManifestLinks(from document: AEXMLElement, _ rootFilePath: String) -> [Link] {
-        let durations = MetadataParser.parseMediaDurations(from: document)
-
-        // Read meta to see if any Link is referenced as the Cover.
-        let coverId: String? = document["package"]["metadata"]["meta"]
-            .all(withAttributes: ["name" : "cover"])?
-            .first?.attributes["content"]
-
+    static internal func parseResources(from manifest: AEXMLElement,
+                                        to publication: inout Publication,
+                                        _ rootFilePath: String)
+    {
         // Get the manifest children items
-        guard let manifestItems = document["package"]["manifest"]["item"].all else {
+        guard let manifestItems = manifest["item"].all else {
             log(.warning, "Manifest have no children elements.")
-            return []
+            return
         }
-        
-        return manifestItems.compactMap { item in
-                // Must have an ID.
-                guard let id = item.attributes["id"] else {
-                    log(.warning, "Manifest item MUST have an id, item ignored.")
-                    return nil
-                }
-                guard let link = linkFromManifest(item, rootFilePath) else {
-                    log(.warning, "Can't parse link with ID \(id)")
-                    return nil
-                }
-    
-                // If the link reference a Smil resource, retrieve and fill its duration.
-                if link.type == "application/smil+xml", let duration = durations["#\(id)"] {
-                    link.duration = duration
-                }
-    
-                // Add the "cover" rel to the link if it is referenced as the cover in the meta property.
-                if let coverId = coverId, id == coverId {
-                    link.rels.append("cover")
-                }
-    
-                return link
+        /// Creates an Link for each of them and add it to the ressources.
+        for item in manifestItems {
+            // Must have an ID.
+            guard let id = item.attributes["id"] else {
+                log(.warning, "Manifest item MUST have an id, item ignored.")
+                continue
             }
+            let link = linkFromManifest(item, rootFilePath)
+            /// If the link reference a Smil resource, retrieve and fill it's duration.
+            if link.typeLink == "application/smil+xml" {
+                // Retrieve the duration of the smil file in the otherMetadata.
+                if let duration = publication.metadata.otherMetadata.first(where: {
+                    $0.property == "#\(id)" })?.value
+                {
+                    link.duration = Float(SMILParser.smilTimeToSeconds(duration))
+                }
+            }
+            publication.resources.append(link)
+        }
     }
-
+    
+    /// Add the "cover" rel to the link referenced as the cover in the meta
+    /// property, if any.
+    ///
+    /// - Parameters:
+    ///   - metadata: The metadata XML element.
+    ///   - publication: The publication object with the `coverLink` property to
+    ///                  fill.
+    static private func coverLinkFromMeta(from metadata: AEXMLElement, to publication: inout Publication) {
+        var coverId: String?
+        
+        // Read meta to see if any Link is referenced as the Cover.
+        if let coverMeta = metadata["meta"].all(withAttributes: ["name" : "cover"])?.first {
+            coverId = coverMeta.attributes["content"]
+            // (The ids are still temporarily stored into the titles at this point).
+            if let coverLink = publication.resources.first(where: {$0.title == coverId}) {
+                coverLink.rel.append("cover")
+            }
+        }
+    }
+    
     /// Parse XML elements of the <ReadingOrder> in the package.opf file.
     /// They are only composed of an `idref` referencing one of the previously
-    /// parsed resource (XML: idref -> id).
+    /// parsed resource (XML: idref -> id). Since we normally don't keep
+    /// the resource id, we store it in the `.title` property, temporarily.
     ///
     /// - Parameters:
     ///   - readingOrder: The ReadingOrder XML element.
-    ///   - manifestLinks: The `Link` parsed in the manifest items.
-    /// - Returns: The `Link` in the reading order, taken from the `manifestLinks`.
-    static internal func parseReadingOrder(from document: AEXMLElement, manifestLinks: [Link]) -> [Link] {
+    ///   - publication: The `Publication` object with `.resource` and `.readingOrder`
+    ///                  properties to fill.
+    static internal func parseReadingOrder(from package: AEXMLElement, to publication: inout Publication) {
         // Get the readingOrder children items.
-        let readingOrderItems = document["package"]["readingOrder"]["itemref"].all
-            ?? document["package"]["spine"]["itemref"].all
-            ?? []
         
-        return readingOrderItems.compactMap { item in
-            // Find the `Link` `idref` is referencing to from the `manifestLinks`.
+        var items = [AEXMLElement]()
+        if let readingOrderItems = package["readingOrder"]["itemref"].all {
+            items = readingOrderItems
+        } else if let spineItems = package["spine"]["itemref"].all {
+            items = spineItems
+        }
+        
+        // Create a `Link` for each readingOrder item and add it to `Publication.readingOrder`.
+        for item in items {
+            // Find the ressource `idref` is referencing to.
             guard let idref = item.attributes["idref"],
-                let link = manifestLinks.first(withProperty: "id", matching: idref) else
+                let index = publication.resources.index(where: { $0.title == idref }) else
             {
-                return nil
+                continue
             }
-            
-            // Parse the additional link properties.
+            // Parse the ressource properties and add it to the corresponding resource.
             if let propertyAttribute = item.attributes["properties"] {
                 let properties = propertyAttribute.components(separatedBy: CharacterSet.whitespaces)
-                parseProperties(&link.properties, from: properties)
+                
+                publication.resources[index].properties = parse(propertiesArray: properties)
             }
-            
             // Retrieve `idref`, referencing a resource id.
             // Only linear items are added to the readingOrder.
             guard isLinear(item.attributes["linear"]) else {
-                return nil
+                continue
             }
-            
-            return link
+            // Clean the title - used as a holder for the `idref`.
+            publication.resources[index].title = nil
+            // Move ressource to `.readingOrder` and remove it from `.ressources`.
+            publication.readingOrder.append(publication.resources[index])
+            publication.resources.remove(at: index)
         }
     }
-
+    
     /// Determine if the xml attribute correspond to the linear one.
     ///
     /// - Parameter linear: The linear attribute value, if any.
@@ -192,48 +254,44 @@ final public class OPFParser {
         }
         return true
     }
-
+    
     // MARK: - Fileprivate Methods.
-
+    
     /// Generate a `Link` form the given manifest's XML element.
     ///
     /// - Parameter item: The XML element, or manifest XML item.
     /// - Returns: The `Link` representing the manifest XML item.
-    static fileprivate func linkFromManifest(_ item: AEXMLElement, _ rootFilePath: String) -> Link? {
-        guard let href = item.attributes["href"] else {
-            return nil
-        }
+    static fileprivate func linkFromManifest(_ item: AEXMLElement, _ rootFilePath: String) -> Link {
+        // The "to be built" link representing the manifest item.
+        let link = Link()
         
-        let propertiesArray = item.attributes["properties"]?.components(separatedBy: .whitespaces) ?? []
-
-        var rels: [String] = []
-        if propertiesArray.contains("nav") {
-            rels.append("contents")
+        // TMP used for storing the id (associated to the idref of the readingOrder items).
+        // Will be cleared after the readingOrder parsing.
+        link.title = item.attributes["id"]
+        link.href = normalize(base: rootFilePath, href: item.attributes["href"]!)
+        link.typeLink = item.attributes["media-type"]
+        if let propertyAttribute = item.attributes["properties"] {
+            let properties = propertyAttribute.components(separatedBy: CharacterSet.whitespaces)
+            
+            link.properties = parse(propertiesArray: properties)
+            /// Rels.
+            if properties.contains("nav") {
+                link.rel.append("contents")
+            }
+            if properties.contains("cover-image") {
+                link.rel.append("cover")
+            }
         }
-        if propertiesArray.contains("cover-image") {
-            rels.append("cover")
-        }
-        
-        var properties = Properties()
-        parseProperties(&properties, from: propertiesArray)
-        
-        if let id = item.attributes["id"] {
-            properties.otherProperties["id"] = id
-        }
-
-        return Link(
-            href: normalize(base: rootFilePath, href: href),
-            type: item.attributes["media-type"],
-            rels: rels,
-            properties: properties
-        )
+        return link
     }
-
+    
     /// Parse properties string array and return a Properties object.
     ///
     /// - Parameter propertiesArray: The array of properties strings.
     /// - Returns: The Properties instance created from the strings array info.
-    static fileprivate func parseProperties(_ properties: inout Properties, from propertiesArray: [String]) {
+    static fileprivate func parse(propertiesArray: [String]) -> Properties {
+        var properties = Properties()
+        
         // Look if item have any properties.
         for property in propertiesArray {
             switch property {
@@ -252,49 +310,47 @@ final public class OPFParser {
                 properties.contains.append("remote-resources")
             /// Page
             case "page-spread-left":
-                properties.page = .left
+                properties.page = "left"
             case "page-spread-right":
-                properties.page = .right
+                properties.page = "right"
             case "page-spread-center":
-                properties.page = .center
+                properties.page = "center"
             /// Spread
             case "rendition:spread-none":
-                properties.spread = .none
+                properties.spread = "none"
             case "rendition:spread-auto":
-                properties.spread = .none
+                properties.spread = "none"
             case "rendition:spread-landscape":
-                properties.spread = .landscape
+                properties.spread = "landscape"
             case "rendition:spread-portrait":
-                // `portrait` is deprecated and should fallback to `both`.
-                // See. https://readium.org/architecture/streamer/parser/metadata#epub-3x-11
-                properties.spread = .both
+                properties.spread = "portrait"
             case "rendition:spread-both":
-                properties.spread = .both
+                properties.spread = "both"
             /// Layout
             case "rendition:layout-reflowable":
-                properties.layout = .reflowable
+                properties.layout = "reflowable"
             case "rendition:layout-pre-paginated":
-                properties.layout = .fixed
+                properties.layout = "fixed"
             /// Orientation
             case "rendition:orientation-auto":
-                properties.orientation = .auto
+                properties.orientation = "auto"
             case "rendition:orientation-landscape":
-                properties.orientation = .landscape
+                properties.orientation = "landscape"
             case "rendition:orientation-portrait":
-                properties.orientation = .portrait
+                properties.orientation = "portrait"
             /// Rendition
             case "rendition:flow-auto":
-                properties.overflow = .auto
+                properties.overflow = "auto"
             case "rendition:flow-paginated":
-                properties.overflow = .paginated
+                properties.overflow = "paginated"
             case "rendition:flow-scrolled-continuous":
-                properties.overflow = .scrolledContinuous
+                properties.overflow = "scrolled-continuous"
             case "rendition:flow-scrolled-doc":
-                properties.overflow = .scrolled
+                properties.overflow = "scrolled"
             default:
                 continue
             }
         }
+        return properties
     }
 }
-

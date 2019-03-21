@@ -18,13 +18,13 @@ extension EncryptionParser: Loggable {}
 final public class EncryptionParser {
     
     /// Parse the <EncryptionProperties> containing <EncryptionProperty> child
-    /// elements in order to fill the `EPUBEncryption`.
+    /// elements in order to fill the `Encryption`.
     ///
     /// - Parameters:
     ///   - encryptedDataElement: The <EncryptedData> parent element.
-    ///   - encryption: The `EPUBEncryption` structure to fill.
+    ///   - encryption: The `Encryption` structure to fill.
     static internal func parseEncryptionProperties(from encryptedDataElement: AEXMLElement,
-                                                   to encryption: inout EPUBEncryption)
+                                                   to encryption: inout Encryption)
     {
         guard let encryptionProperties = encryptedDataElement["EncryptionProperties"]["EncryptionProperty"].all else {
             return
@@ -40,11 +40,11 @@ final public class EncryptionParser {
     /// If found add `encryption` to the link properties.encryption.
     ///
     /// - Parameters:
-    ///   - encryption: An `EPUBEncryption` instance.
+    ///   - encryption: An `Encryption` instance.
     ///   - publication: The `Publication` where to look for
     ///   - encryptedDataElement: The xml element containing the encrypted
     ///                           resource's URI.
-    static internal func add(encryption: EPUBEncryption,
+    static internal func add(encryption: Encryption,
                              toLinkInPublication publication: inout Publication,
                              _ encryptedDataElement: AEXMLElement)
     {
@@ -65,9 +65,9 @@ final public class EncryptionParser {
     /// - Parameters:
     ///   - encryptionProperty: The EncryptionProperty element, parent of
     ///                         <Compression>.
-    ///   - encryption: The EPUBEncryption structure to fill.
+    ///   - encryption: The Encryption structure to fill.
     static fileprivate func parseCompressionElement(from encryptionProperty: AEXMLElement,
-                                                    to encryption: inout EPUBEncryption)
+                                                    to encryption: inout Encryption)
     {
         // Check that we have a compression element, with originalLength, not empty.
         guard let compressionElement = encryptionProperty["Compression"].first,

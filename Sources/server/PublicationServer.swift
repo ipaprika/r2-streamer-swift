@@ -238,7 +238,7 @@ public class PublicationServer {
             let relativePath = String(request.path[request.path.index(endpoint.endIndex, offsetBy: 1)...])
             //
             let resource = publication.resource(withRelativePath: relativePath)
-            let contentType = resource?.type ?? "application/octet-stream"
+            let contentType = resource?.typeLink ?? "application/octet-stream"
             // Get a data input stream from the fetcher.
             do {
                 let dataStream = try fetcher.dataStream(forRelativePath: relativePath)
@@ -269,13 +269,15 @@ public class PublicationServer {
     fileprivate func addManifestHandler(for pubBox: PubBox, at endpoint: String) {
         let publication = pubBox.publication
         let container = pubBox.associatedContainer
-
+        
         /// The webserver handler to process the HTTP GET
         func manifestHandler(request: GCDWebServerRequest?) -> GCDWebServerResponse? {
-            guard let manifestData = publication.manifest else {
+            let manifestJSON = publication.manifestCanonical
+            let type = "application/webpub+json; charset=utf-8"
+            
+            guard let manifestData = manifestJSON.data(using: .utf8) else {
                 return GCDWebServerResponse(statusCode: 404)
             }
-            let type = "application/webpub+json; charset=utf-8"
             return GCDWebServerDataResponse(data: manifestData, contentType: type)
         }
         webServer.addHandler(
@@ -283,7 +285,7 @@ public class PublicationServer {
             pathRegex: "/\(endpoint)/manifest.json",
             request: GCDWebServerRequest.self,
             processBlock: manifestHandler)
-
+        
     }
 
     public func remove(_ publication: Publication) {
@@ -293,7 +295,7 @@ public class PublicationServer {
             {
                 pubBoxes.remove(at: index)
                 // Remove selfLinks from publication.
-                publication.links = publication.links.filter { !$0.rels.contains("self") }
+                publication.links = publication.links.filter { !$0.rel.contains("self") }
                 break
             }
         }
@@ -308,7 +310,7 @@ public class PublicationServer {
             return
         }
         // Remove self link from publication.
-        pubBox.publication.links = pubBox.publication.links.filter { !$0.rels.contains("self") }
+        pubBox.publication.links = pubBox.publication.links.filter { !$0.rel.contains("self") }
         // Remove the pubBox from the array.
         pubBoxes[endpoint] = nil
         log(.info, "Publication at \(endpoint) has been successfully removed.")
