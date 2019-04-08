@@ -9,9 +9,9 @@
 //  in the LICENSE file present in the project repository where this source code is maintained.
 //
 
-#if COCOAPODS
+#if canImport(GCDWebServer)
 import GCDWebServer
-#else
+#elseif canImport(GCDWebServers)
 import GCDWebServers
 #endif
 

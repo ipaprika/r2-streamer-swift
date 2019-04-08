@@ -10,9 +10,10 @@
 //
 
 import R2Shared
-#if COCOAPODS
+
+#if canImport(GCDWebServer)
 import GCDWebServer
-#else
+#elseif canImport(GCDWebServers)
 import GCDWebServers
 #endif
 
