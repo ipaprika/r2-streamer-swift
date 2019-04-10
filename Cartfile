@@ -2,5 +2,5 @@ github "ipaprika/r2-shared-swift" "develop"
 github "tadija/AEXML" == 4.3.3
 github "swisspol/GCDWebServer" == 3.5.2
 github "krzyzanowskim/CryptoSwift" == 0.14.0
-github "cezheng/Fuzi" "2.2.1"
+github "cezheng/Fuzi" == 2.2.1
 github "dexman/Minizip"
