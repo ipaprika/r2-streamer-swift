@@ -66,7 +66,7 @@ final public class OPFParser {
             resources: resources
         )
     }
-
+    
     /// Parse the Metadata in the XML <metadata> element.
     ///
     /// - Parameter document: Parse the Metadata in the XML <metadata> element.
@@ -75,7 +75,7 @@ final public class OPFParser {
         guard let title = MetadataParser.mainTitle(from: metadataElement) else {
             throw OPFParserError.missingPublicationTitle
         }
-
+        
         var metadata = Metadata(
             identifier: MetadataParser.uniqueIdentifier(from: document),
             title: title,
@@ -92,13 +92,13 @@ final public class OPFParser {
                     .map { $0.string }.joined(separator: " ") ?? ""
             ]
         )
-
+        
         MetadataParser.parseContributors(from: metadataElement, to: &metadata, epubVersion)
         metadata.rendition = MetadataParser.parseRenditionProperties(from: metadataElement)
         
         return metadata
     }
-
+    
     /// Parses XML elements of the <Manifest> in the package.opf file as a list of `Link`.
     ///
     /// - Parameters:
@@ -107,12 +107,12 @@ final public class OPFParser {
     ///   - coverId: The coverId to identify the cover ressource and tag it.
     static internal func parseManifestLinks(from document: AEXMLElement, _ rootFilePath: String) -> [Link] {
         let durations = MetadataParser.parseMediaDurations(from: document)
-
+        
         // Read meta to see if any Link is referenced as the Cover.
         let coverId: String? = document["package"]["metadata"]["meta"]
             .all(withAttributes: ["name" : "cover"])?
             .first?.attributes["content"]
-
+        
         // Get the manifest children items
         guard let manifestItems = document["package"]["manifest"]["item"].all else {
             log(.warning, "Manifest have no children elements.")
@@ -120,30 +120,30 @@ final public class OPFParser {
         }
         
         return manifestItems.compactMap { item in
-                // Must have an ID.
-                guard let id = item.attributes["id"] else {
-                    log(.warning, "Manifest item MUST have an id, item ignored.")
-                    return nil
-                }
-                guard let link = linkFromManifest(item, rootFilePath) else {
-                    log(.warning, "Can't parse link with ID \(id)")
-                    return nil
-                }
-    
-                // If the link reference a Smil resource, retrieve and fill its duration.
-                if link.type == "application/smil+xml", let duration = durations["#\(id)"] {
-                    link.duration = duration
-                }
-    
-                // Add the "cover" rel to the link if it is referenced as the cover in the meta property.
-                if let coverId = coverId, id == coverId {
-                    link.rels.append("cover")
-                }
-    
-                return link
+            // Must have an ID.
+            guard let id = item.attributes["id"] else {
+                log(.warning, "Manifest item MUST have an id, item ignored.")
+                return nil
             }
+            guard let link = linkFromManifest(item, rootFilePath) else {
+                log(.warning, "Can't parse link with ID \(id)")
+                return nil
+            }
+            
+            // If the link reference a Smil resource, retrieve and fill its duration.
+            if link.type == "application/smil+xml", let duration = durations["#\(id)"] {
+                link.duration = duration
+            }
+            
+            // Add the "cover" rel to the link if it is referenced as the cover in the meta property.
+            if let coverId = coverId, id == coverId {
+                link.rels.append("cover")
+            }
+            
+            return link
+        }
     }
-
+    
     /// Parse XML elements of the <ReadingOrder> in the package.opf file.
     /// They are only composed of an `idref` referencing one of the previously
     /// parsed resource (XML: idref -> id).
@@ -181,7 +181,7 @@ final public class OPFParser {
             return link
         }
     }
-
+    
     /// Determine if the xml attribute correspond to the linear one.
     ///
     /// - Parameter linear: The linear attribute value, if any.
@@ -192,9 +192,9 @@ final public class OPFParser {
         }
         return true
     }
-
+    
     // MARK: - Fileprivate Methods.
-
+    
     /// Generate a `Link` form the given manifest's XML element.
     ///
     /// - Parameter item: The XML element, or manifest XML item.
@@ -205,7 +205,7 @@ final public class OPFParser {
         }
         
         let propertiesArray = item.attributes["properties"]?.components(separatedBy: .whitespaces) ?? []
-
+        
         var rels: [String] = []
         if propertiesArray.contains("nav") {
             rels.append("contents")
@@ -220,7 +220,7 @@ final public class OPFParser {
         if let id = item.attributes["id"] {
             properties.otherProperties["id"] = id
         }
-
+        
         return Link(
             href: normalize(base: rootFilePath, href: href),
             type: item.attributes["media-type"],
@@ -228,7 +228,7 @@ final public class OPFParser {
             properties: properties
         )
     }
-
+    
     /// Parse properties string array and return a Properties object.
     ///
     /// - Parameter propertiesArray: The array of properties strings.
@@ -297,4 +297,3 @@ final public class OPFParser {
         }
     }
 }
-

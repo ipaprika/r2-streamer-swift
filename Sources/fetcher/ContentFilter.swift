@@ -185,6 +185,33 @@ final internal class ContentFiltersEpub: ContentFilters {
         resourceHtml = resourceHtml.insert(string: scriptUtils, at: headEnd)
         resourceHtml = resourceHtml.insert(string: fontStyle, at: headEnd)
 
+        // TTS 지원
+        let scriptJquery = getHtmlScript(forResource: "\(baseUrl)scripts/jquery-1.4.1.min.js")
+        let scriptAddonPaprika = getHtmlScript(forResource: "\(baseUrl)scripts/addon_ipaprika.js")
+        let scriptTTS = getHtmlScript(forResource: "\(baseUrl)scripts/tts.js")
+        
+        resourceHtml = resourceHtml.insert(string: scriptTTS, at: headEnd)
+        resourceHtml = resourceHtml.insert(string: scriptAddonPaprika, at: headEnd)
+        resourceHtml = resourceHtml.insert(string: scriptJquery, at: headEnd)
+        
+        // 커스텀 폰트 추가
+        /*
+         let fontStyle = getHtmlFontStyle(forResource: "\(baseUrl)fonts/OpenDyslexic-Regular.otf", fontFamily: "OpenDyslexic")
+         resourceHtml = resourceHtml.insert(string: fontStyle, at: headEnd)
+         */
+        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Batang_Pro Light.otf", fontFamily: "KoPub Batang Light"),
+                                           at: headEnd)
+        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Batang_Pro Medium.otf", fontFamily: "KoPub Batang Medium"),
+                                           at: headEnd)
+        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Batang_Pro Bold.otf", fontFamily: "KoPub Batang Bold"),
+                                           at: headEnd)
+        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Dotum_Pro Light.otf", fontFamily: "KoPub Dotum Light"),
+                                           at: headEnd)
+        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Dotum_Pro Medium.otf", fontFamily: "KoPub Dotum Medium"),
+                                           at: headEnd)
+        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Dotum_Pro Bold.otf", fontFamily: "KoPub Dotum Bold"),
+                                           at: headEnd)
+        
         let enhancedData = resourceHtml.data(using: String.Encoding.utf8)
         let enhancedStream = DataInputStream(data: enhancedData!)
         
