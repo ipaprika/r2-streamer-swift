@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		03BB67F12238852D009A03C5 /* OPFParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BB67F02238852D009A03C5 /* OPFParser.swift */; };
-		03C3CC6A222DBD9E00A01731 /* R2Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03C3CC69222DBD9E00A01731 /* R2Shared.framework */; };
 		57BFC4A7209C8EDC0018EC21 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 57BFC4A5209C8EDC0018EC21 /* scripts */; };
 		57BFC4A8209C8EDC0018EC21 /* styles in Resources */ = {isa = PBXBuildFile; fileRef = 57BFC4A6209C8EDC0018EC21 /* styles */; };
 		59501DDE1E2FB0D700D1B4BF /* R2Streamer.h in Headers */ = {isa = PBXBuildFile; fileRef = 59501DD01E2FB0D700D1B4BF /* R2Streamer.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -23,16 +22,14 @@
 		59501E0C1E2FB16600D1B4BF /* ZipInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59501DF51E2FB16600D1B4BF /* ZipInputStream.swift */; };
 		59501E141E2FB16600D1B4BF /* Zip.h in Headers */ = {isa = PBXBuildFile; fileRef = 59501E001E2FB16600D1B4BF /* Zip.h */; };
 		59501E151E2FB16600D1B4BF /* ZipArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59501E011E2FB16600D1B4BF /* ZipArchive.swift */; };
-		AEBE1F3D20EF903700418960 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = AEBE1F3C20EF903700418960 /* fonts */; };
-		C33F793C2199C60A00123A74 /* R2Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C33F793B2199C60A00123A74 /* R2Shared.framework */; };
-		C3EB74E4219869BA008D0242 /* AEXML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E181E2FB1F500D1B4BF /* AEXML.framework */; };
-		C3EB74E5219869BA008D0242 /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3ED92DB1EA0C93F00E15C8F /* CryptoSwift.framework */; };
-		C3EB74E6219869BA008D0242 /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E191E2FB1F500D1B4BF /* GCDWebServers.framework */; };
-		C3EB74E7219869BA008D0242 /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D011EF208020270097A87C /* Minizip.framework */; };
-		C3EB74E8219869BA008D0242 /* ObjectMapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E1A1E2FB1F500D1B4BF /* ObjectMapper.framework */; };
-		C3EB74EB219869BA008D0242 /* Fuzi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EB74EA219869BA008D0242 /* Fuzi.framework */; };
 		59501E201E2FB2AD00D1B4BF /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 59501E1F1E2FB2AD00D1B4BF /* libz.tbd */; };
 		AEBE1F3D20EF903700418960 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = AEBE1F3C20EF903700418960 /* fonts */; };
+		C38851CA2252734A0099685A /* Fuzi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EB74EA219869BA008D0242 /* Fuzi.framework */; };
+		C38851CF2252734A0099685A /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C38851CB2252734A0099685A /* CryptoSwift.framework */; };
+		C38851D02252734A0099685A /* AEXML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C38851CC2252734A0099685A /* AEXML.framework */; };
+		C38851D12252734A0099685A /* Minizip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C38851CD2252734A0099685A /* Minizip.framework */; };
+		C38851D4225273580099685A /* R2Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C38851D3225273580099685A /* R2Shared.framework */; };
+		C38851E0225276AC0099685A /* GCDWebServers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C38851CE2252734A0099685A /* GCDWebServers.framework */; };
 		CA16A83D223112BB00E66255 /* PDFFileCGParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA16A83C223112BB00E66255 /* PDFFileCGParser.swift */; };
 		CA16A83F2231193E00E66255 /* PDFContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA16A83E2231193E00E66255 /* PDFContainer.swift */; };
 		CA2AE324221C1F5E008BD18F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA2AE323221C1F5E008BD18F /* Logger.swift */; };
@@ -53,11 +50,6 @@
 		F3B8F0221E9E244B0052D64B /* EncryptionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3B8F0211E9E244B0052D64B /* EncryptionParser.swift */; };
 		F3B8F0241E9E62A50052D64B /* ContentFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3B8F0231E9E62A50052D64B /* ContentFilter.swift */; };
 		F3D434241E8E9DA5008C379E /* CbzParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3D434231E8E9DA5008C379E /* CbzParser.swift */; };
-		F3D434261E8E9ED0008C379E /* ContainerCbz.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3D434251E8E9ED0008C379E /* ContainerCbz.swift */; };
-		F3DEE6E21E5C5A53007FE63D /* OPFParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3DEE6E11E5C5A53007FE63D /* OPFParser.swift */; };
-		F3E0214F1E9277A80094CFF7 /* ContainerCbzDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E0214E1E9277A80094CFF7 /* ContainerCbzDirectory.swift */; };
-		F3E6A2D61E70111500BBD81C /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E6A2D51E70111500BBD81C /* Logger.swift */; };
-		F3E6A2D81E70113600BBD81C /* LoggerStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E6A2D71E70113600BBD81C /* LoggerStub.swift */; };
 		F3ED92D61E9F702E00E15C8F /* FontDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3ED92D51E9F702E00E15C8F /* FontDecoder.swift */; };
 		F3ED92DA1EA0AF0000E15C8F /* DataInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3ED92D91EA0AF0000E15C8F /* DataInputStream.swift */; };
 		F3F41E151FA0EBDE00F97737 /* DataCompression.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3F41E141FA0EBDE00F97737 /* DataCompression.swift */; };
@@ -86,6 +78,12 @@
 		59501E1F1E2FB2AD00D1B4BF /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		AEBE1F3C20EF903700418960 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fonts; sourceTree = "<group>"; };
 		C33F793B2199C60A00123A74 /* R2Shared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = R2Shared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C38851CB2252734A0099685A /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
+		C38851CC2252734A0099685A /* AEXML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AEXML.framework; path = Carthage/Build/iOS/AEXML.framework; sourceTree = "<group>"; };
+		C38851CD2252734A0099685A /* Minizip.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Minizip.framework; path = Carthage/Build/iOS/Minizip.framework; sourceTree = "<group>"; };
+		C38851CE2252734A0099685A /* GCDWebServers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GCDWebServers.framework; path = Carthage/Build/iOS/GCDWebServers.framework; sourceTree = "<group>"; };
+		C38851D3225273580099685A /* R2Shared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = R2Shared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C38851DE225276840099685A /* GCDWebServer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GCDWebServer.framework; path = Carthage/Build/iOS/GCDWebServer.framework; sourceTree = "<group>"; };
 		C3EB74EA219869BA008D0242 /* Fuzi.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fuzi.framework; path = Carthage/Build/iOS/Fuzi.framework; sourceTree = "<group>"; };
 		C3EC68452198616C007EEEC1 /* Pods_R2TestApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_R2TestApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3EC68532198674E007EEEC1 /* Pods_R2TestApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_R2TestApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,15 +123,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C33F793C2199C60A00123A74 /* R2Shared.framework in Frameworks */,
-				C3EB74EB219869BA008D0242 /* Fuzi.framework in Frameworks */,
-				C3EB74E4219869BA008D0242 /* AEXML.framework in Frameworks */,
-				C3EB74E5219869BA008D0242 /* CryptoSwift.framework in Frameworks */,
-				C3EB74E6219869BA008D0242 /* GCDWebServers.framework in Frameworks */,
-				C3EB74E7219869BA008D0242 /* Minizip.framework in Frameworks */,
-				C3EB74E8219869BA008D0242 /* ObjectMapper.framework in Frameworks */,
-				03C3CC6A222DBD9E00A01731 /* R2Shared.framework in Frameworks */,
+				C38851E0225276AC0099685A /* GCDWebServers.framework in Frameworks */,
+				C38851D4225273580099685A /* R2Shared.framework in Frameworks */,
 				59501E201E2FB2AD00D1B4BF /* libz.tbd in Frameworks */,
+				C38851CF2252734A0099685A /* CryptoSwift.framework in Frameworks */,
+				C38851D02252734A0099685A /* AEXML.framework in Frameworks */,
+				C38851D12252734A0099685A /* Minizip.framework in Frameworks */,
+				C38851CA2252734A0099685A /* Fuzi.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,13 +247,16 @@
 		59501E171E2FB1F500D1B4BF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C38851DE225276840099685A /* GCDWebServer.framework */,
+				C38851D3225273580099685A /* R2Shared.framework */,
+				C38851CC2252734A0099685A /* AEXML.framework */,
+				C38851CB2252734A0099685A /* CryptoSwift.framework */,
+				C38851CE2252734A0099685A /* GCDWebServers.framework */,
+				C38851CD2252734A0099685A /* Minizip.framework */,
 				C33F793B2199C60A00123A74 /* R2Shared.framework */,
 				C3EB74EA219869BA008D0242 /* Fuzi.framework */,
 				C3EC68532198674E007EEEC1 /* Pods_R2TestApp.framework */,
 				C3EC68452198616C007EEEC1 /* Pods_R2TestApp.framework */,
-				03D011EF208020270097A87C /* Minizip.framework */,
-				F3E7D4241F4ED05F00DF166D /* R2Shared.framework */,
-				F3ED92DB1EA0C93F00E15C8F /* CryptoSwift.framework */,
 				03C3CC69222DBD9E00A01731 /* R2Shared.framework */,
 				59501E1F1E2FB2AD00D1B4BF /* libz.tbd */,
 			);
@@ -353,6 +352,7 @@
 				59501DC91E2FB0D700D1B4BF /* Frameworks */,
 				59501DCA1E2FB0D700D1B4BF /* Headers */,
 				59501DCB1E2FB0D700D1B4BF /* Resources */,
+				C38851D5225274070099685A /* Carthage Run Script */,
 			);
 			buildRules = (
 			);
@@ -385,6 +385,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 59501DC31E2FB0D700D1B4BF;
@@ -411,27 +412,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		59501E1E1E2FB1FC00D1B4BF /* Carthage Run Script */ = {
+		C38851D5225274070099685A /* Carthage Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/AEXML.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/ObjectMapper.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/GCDWebServers.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/CryptoSwift.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/AEXML.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/Minizip.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/GCDWebServers.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Fuzi.framework",
 			);
 			name = "Carthage Run Script";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#/usr/local/bin/carthage copy-frameworks\n";
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
-			shellScript = "#/usr/local/bin/carthage copy-frameworks";
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
+			shellScript = "/usr/local/bin/carthage copy-frameworks\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

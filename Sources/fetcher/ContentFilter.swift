@@ -51,15 +51,7 @@ internal extension ContentFilters {
 ///     - Font deobfuscation using the Decoder object.
 ///     - HTML injections (scripts css/js).
 final internal class ContentFiltersEpub: ContentFilters {
-    // File name for untils.js, using ES5 code for any version older than iOS 10.
-    internal let utilsJS:String = {
-        if #available(iOS 10, *) {
-            return "utils.js"
-        } else {
-            return "utils-old.js"
-        }
-    } ()
-    
+
     /// Apply the Epub content filters on the content of the `input` stream para-
     /// meter.
     ///
@@ -81,19 +73,19 @@ final internal class ContentFiltersEpub: ContentFilters {
         decodedInputStream = FontDecoder.decoding(decodedInputStream,
                                                   of: resourceLink,
                                                   publication.metadata.identifier)
-        
+    
         // Inject additional content in the resource if test succeed.
         // if type == "application/xhtml+xml"
         //   if (publication layout is 'reflow' &&  resource is `not specified`)
         //     || resource is 'reflow'
         //       - inject pagination
         if let link = publication.link(withHref: path),
-            link.typeLink == "application/xhtml+xml" || link.typeLink == "text/html",
-            let baseUrl = publication.baseUrl?.deletingLastPathComponent()
+            ["application/xhtml+xml", "text/html"].contains(link.type),
+            let baseUrl = publication.baseURL?.deletingLastPathComponent()
         {
-            if publication.metadata.rendition.layout == .reflowable
+            if publication.metadata.rendition?.layout == .reflowable
                 && link.properties.layout == nil
-                || link.properties.layout == "reflowable"
+                || link.properties.layout == .reflowable
             {
                 decodedInputStream = injectReflowableHtml(in: decodedInputStream, for: publication)
             } else {
@@ -153,7 +145,7 @@ final internal class ContentFiltersEpub: ContentFilters {
             abort()
         }
         
-        guard let baseUrl = publication.baseUrl?.deletingLastPathComponent() else {
+        guard let baseUrl = publication.baseURL?.deletingLastPathComponent() else {
             print("Invalid host")
             abort()
         }
@@ -161,18 +153,13 @@ final internal class ContentFiltersEpub: ContentFilters {
         //publication.metadata.primaryContentLayout
         guard let document = try? XMLDocument(string: resourceHtml) else {return stream}
         
-        let langAttribute = document.root?.attr("lang")
-        let langType = LangType(rawString: langAttribute ?? "")
+        let language = document.root?.attr("lang")
+        let contentLayout = publication.contentLayout(forLanguage: language)
+        let styleSubFolder = contentLayout.rawValue
         
-        let readingProgression = publication.metadata.readingProgression
-        let contentLayoutStyle = Metadata.contentlayoutStyle(for: langType, readingProgression: readingProgression)
-        
-        let styleSubFolder = contentLayoutStyle.rawValue
-        
-        if let primaryContentLayout = publication.metadata.primaryContentLayout {
-            if let preset = userSettingsUIPreset[primaryContentLayout] {
-                publication.userSettingsUIPreset = preset
-            }
+        let primaryContentLayout = publication.contentLayout
+        if let preset = userSettingsUIPreset[primaryContentLayout] {
+            publication.userSettingsUIPreset = preset
         }
         
         let cssBefore = getHtmlLink(forResource: "\(baseUrl)styles/\(styleSubFolder)/ReadiumCSS-before.css")
@@ -186,42 +173,18 @@ final internal class ContentFiltersEpub: ContentFilters {
             print("Invalid resource")
             abort()
         }
-        
         let cssAfter = getHtmlLink(forResource: "\(baseUrl)styles/\(styleSubFolder)/ReadiumCSS-after.css")
         let scriptTouchHandling = getHtmlScript(forResource: "\(baseUrl)scripts/touchHandling.js")
-        let scriptUtils = getHtmlScript(forResource: "\(baseUrl)scripts/\(utilsJS)")
         
+        let scriptUtils = getHtmlScript(forResource: "\(baseUrl)scripts/utils.js")
+        
+        let fontStyle = getHtmlFontStyle(forResource: "\(baseUrl)fonts/OpenDyslexic-Regular.otf", fontFamily: "OpenDyslexic")
+
         resourceHtml = resourceHtml.insert(string: cssAfter, at: headEnd)
         resourceHtml = resourceHtml.insert(string: scriptTouchHandling, at: headEnd)
         resourceHtml = resourceHtml.insert(string: scriptUtils, at: headEnd)
+        resourceHtml = resourceHtml.insert(string: fontStyle, at: headEnd)
 
-        // TTS 지원
-        let scriptJquery = getHtmlScript(forResource: "\(baseUrl)scripts/jquery-1.4.1.min.js")
-        let scriptAddonPaprika = getHtmlScript(forResource: "\(baseUrl)scripts/addon_ipaprika.js")
-        let scriptTTS = getHtmlScript(forResource: "\(baseUrl)scripts/tts.js")
-        
-        resourceHtml = resourceHtml.insert(string: scriptTTS, at: headEnd)
-        resourceHtml = resourceHtml.insert(string: scriptAddonPaprika, at: headEnd)
-        resourceHtml = resourceHtml.insert(string: scriptJquery, at: headEnd)
-        
-        // 커스텀 폰트 추가
-        /*
-         let fontStyle = getHtmlFontStyle(forResource: "\(baseUrl)fonts/OpenDyslexic-Regular.otf", fontFamily: "OpenDyslexic")
-         resourceHtml = resourceHtml.insert(string: fontStyle, at: headEnd)
-         */
-        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Batang_Pro Light.otf", fontFamily: "KoPub Batang Light"),
-                                           at: headEnd)
-        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Batang_Pro Medium.otf", fontFamily: "KoPub Batang Medium"),
-                                           at: headEnd)
-        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Batang_Pro Bold.otf", fontFamily: "KoPub Batang Bold"),
-                                           at: headEnd)
-        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Dotum_Pro Light.otf", fontFamily: "KoPub Dotum Light"),
-                                           at: headEnd)
-        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Dotum_Pro Medium.otf", fontFamily: "KoPub Dotum Medium"),
-                                           at: headEnd)
-        resourceHtml = resourceHtml.insert(string: getHtmlFontStyle(forResource: "\(baseUrl)fonts/KoPub Dotum_Pro Bold.otf", fontFamily: "KoPub Dotum Bold"),
-                                           at: headEnd)
-        
         let enhancedData = resourceHtml.data(using: String.Encoding.utf8)
         let enhancedStream = DataInputStream(data: enhancedData!)
         
@@ -250,7 +213,7 @@ final internal class ContentFiltersEpub: ContentFilters {
         // Touch event bubbling.
         includes.append(getHtmlScript(forResource: "\(baseUrl)scripts/touchHandling.js"))
         // Misc JS utils.
-        includes.append(getHtmlScript(forResource: "\(baseUrl)scripts/\(utilsJS)"))
+        includes.append(getHtmlScript(forResource: "\(baseUrl)scripts/utils.js"))
 
         for element in includes {
             resourceHtml = resourceHtml.insert(string: element, at: endHeadIndex)
@@ -325,6 +288,12 @@ let userSettingsUIPreset:[ContentLayoutStyle: [ReadiumCSSName: Bool]] = [
 
 /// Content filter specialization for CBZ.
 internal class ContentFiltersCbz: ContentFilters {
+    required init() {
+    }
+}
+
+/// Content filter specialization for PDF.
+internal class ContentFiltersPDF: ContentFilters {
     required init() {
     }
 }
