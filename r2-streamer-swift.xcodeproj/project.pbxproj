@@ -352,7 +352,6 @@
 				59501DC91E2FB0D700D1B4BF /* Frameworks */,
 				59501DCA1E2FB0D700D1B4BF /* Headers */,
 				59501DCB1E2FB0D700D1B4BF /* Resources */,
-				C38851D5225274070099685A /* Carthage Run Script */,
 			);
 			buildRules = (
 			);
@@ -410,32 +409,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		C38851D5225274070099685A /* Carthage Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/CryptoSwift.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/AEXML.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/Minizip.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/GCDWebServers.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/Fuzi.framework",
-			);
-			name = "Carthage Run Script";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage copy-frameworks\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		59501DC81E2FB0D700D1B4BF /* Sources */ = {
