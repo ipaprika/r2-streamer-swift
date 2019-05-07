@@ -4,6 +4,9 @@ var ADDON_IPAPRIKA = (ADDON_IPAPRIKA == null) ? {} : ADDON_IPAPRIKA;
 
 ADDON_IPAPRIKA.JS = {
 
+    PREV_READING_TTS_POS: "", // 이전에 읽어들였던 TTS 위치 값 문자열을 저장하는 객체
+    CURR_READING_TTS_POS: "", // 현재 읽어들인 TTS 위치 값 문자열을 저장하는 객체
+
     /*****************************************************************
     * TTS 대상 객체 Json 목록 가져오기
     *****************************************************************/
@@ -209,11 +212,20 @@ ADDON_IPAPRIKA.JS = {
 
         // TTS 커스텀 태그 영역에 설정된 인덱스 번호 속성 설정 (해당 속성이 있을 경우 TTS 대상에 포함됨)
         content_root.find(".ipaprika_character_area").each(function () {
+			
+			// 태그 위치 값 저장
+			var pos = $(this).position();
+			$(this).css("left", pos.left);
+			$(this).css("top", pos.top);
 
             set_TTS_Tag_Index($(this)); // TTS 커스텀 태그 영역에 설정된 인덱스 번호 속성 설정
         });
+		
+		ADDON_IPAPRIKA.JS.PREV_READING_TTS_POS = ADDON_IPAPRIKA.JS.CURR_READING_TTS_POS; // 이전에 읽어들인 TTS 위치 값 저장		
+		ADDON_IPAPRIKA.JS.CURR_READING_TTS_POS = ""; // 현재 읽어들인 TTS 위치 값 초기화
         
         // TTS 대상 객체 반환 Json 문자열 생성
+		var is_first = true;
 		if (tts_item_idx > 0) {
 			
 			result_json += "[";
@@ -221,12 +233,30 @@ ADDON_IPAPRIKA.JS = {
 
 				var ID = ".-tts-item-idx-" + idx + "-";
 				var TEXT = "";
-				content_root.find(ID).each(function () {
-
-					TEXT += $(this).text();
+				content_root.find(ID).each(function () {					
+					
+					// 2 페이지 모드일 경우, 리디움-2의 버그인건지 페이지 개수가 홀수일 경우 마지막 페이지가 2번 반복해서 표시된다.
+					// 예를 들어 총 5페이지라고 가정한다면, '1-2 / 3-4 / 5-빈페이지' 형태로 표시되는게 아니라.. '1-2 / 3-4 / 4-5' 형태로 표시되버림..
+					// 이런 문제점 때문에 마지막에 같은 구간을 반복적으로 읽게됨.. 이 부분 해결을 위해 이전에 읽었던 TTS 내역을 제외시키는 로직을 추가시킴!
+					
+					var style_left_top = "; left: " + $(this).css("left") + "; top: " + $(this).css("top");
+					
+					ADDON_IPAPRIKA.JS.CURR_READING_TTS_POS += style_left_top;
+					
+					if (ADDON_IPAPRIKA.JS.PREV_READING_TTS_POS.indexOf(style_left_top) == -1) {
+						// 이전에 읽지 않은 TTS 위치일 경우만 추가
+						
+						TEXT += $(this).text();
+					}
 				});
-				if (idx > 0) result_json += ",";
-				result_json += "{\"ID\": \"" + ID + "\", \"TEXT\": \"" + ADDON_IPAPRIKA.JS.convert_Json_Val(TEXT) + "\"}";
+				
+				if (TEXT != "") {
+				
+					if (!is_first) result_json += ",";
+					result_json += "{\"ID\": \"" + ID + "\", \"TEXT\": \"" + ADDON_IPAPRIKA.JS.convert_Json_Val(TEXT) + "\"}";
+					
+					is_first = false;
+				}
 			}
 			result_json += "]";
 		}
@@ -300,7 +330,8 @@ ADDON_IPAPRIKA.JS = {
 		window.scrollTo(move_scroll_left, 0);
 
         //if (move_scroll_left + $(window).width() >= $(document).width()) is_last_page = true; // 마지막 페이지 임을 알림
-        if (prev_scroll_left == obj.scrollLeft()) is_last_page = true; // 마지막 페이지 임을 알림
+        //if (prev_scroll_left == obj.scrollLeft()) is_last_page = true; // 마지막 페이지 임을 알림		
+		if (ADDON_IPAPRIKA.JS.PREV_READING_TTS_POS == ADDON_IPAPRIKA.JS.CURR_READING_TTS_POS) is_last_page = true; // 마지막 페이지 임을 알림
 
         return is_last_page;
     },
